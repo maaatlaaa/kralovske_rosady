@@ -18,3 +18,17 @@ class Karta:
         """ Vraci svou hodnotu """
         return self.hodnota
 
+
+class CilovaKarta:
+    """ O cilove karty se soutezi"""
+    def __init__(self,nazev, hodnota):
+        # id = 1-6 pro jednotlivé názvy
+        self.nazev = nazev
+        self.hodnota = hodnota
+
+    def get_jmeno(self):
+        """ Vraci sve jmeno """
+        return self.nazev
+    def get_hodnotu(self):
+        """ Vraci svou hodnotu """
+        return self.hodnota
