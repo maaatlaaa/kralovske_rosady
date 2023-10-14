@@ -17,3 +17,4 @@ class Karta:
     def get_hodnota(self):
         """ Vraci svou hodnotu """
         return self.hodnota
+
