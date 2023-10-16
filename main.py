@@ -359,16 +359,11 @@ class Hra:
                         self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] + (
                                     self.pocet_hracu - radek - 1) * 3
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Dvojník":
-                        zbyvajici_radky = self.pocet_hracu - radek - 1
-                        while zbyvajici_radky != 0:
-                            if self.hraci_plocha[radek + (self.pocet_hracu - zbyvajici_radky)][sloupec][
-                                "karta"] != "Dvojník" and \
-                                    self.hraci_plocha[radek + (self.pocet_hracu - zbyvajici_radky)][sloupec][
-                                        "karta"] != "volne":
-                                self.hraci_plocha[radek][sloupec]["hodnota"] = \
-                                self.hraci_plocha[radek + (self.pocet_hracu - zbyvajici_radky)][sloupec]["hodnota"]
+                        for r in range(radek + 1, self.pocet_hracu):
+                            if (self.hraci_plocha[r][sloupec]["karta"] != "Dvojník"
+                                    and self.hraci_plocha[r][sloupec]["karta"] != "volne"):
+                                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[r][sloupec]["hodnota"]
                                 break
-                            zbyvajici_radky -= 1
 
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
                         if vyskyt_julie == 1:
