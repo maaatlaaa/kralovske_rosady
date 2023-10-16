@@ -234,13 +234,7 @@ class Hra:
 
         for sloupec in range(self.pocet_hracu):
             for radek in range(self.pocet_hracu):
-                self.hraci_plocha[sloupec][radek] = {
-            "sloupec": 0,
-            "radek": 0,
-            "karta": "volne",
-            "stav": 0,
-            "hrac": "jmeno",
-            "hodnota": 0}
+                self.reset_pole(sloupec, radek)
 
     def kolo(self):
         """Kolo:
@@ -308,24 +302,12 @@ class Hra:
                 if vyskyt_magu == 1:
                     for radek in range(self.pocet_hracu):
                         if self.hraci_plocha[radek][sloupec]["hodnota"] >= 10:
-                            self.hraci_plocha[radek][sloupec]= {
-            "sloupec": 0,
-            "radek": 0,
-            "karta": "volne",
-            "stav": 0,
-            "hrac": "jmeno",
-            "hodnota": 0}
+                            self.reset_pole(radek, sloupec)
                 elif vyskyt_carodejnice == 1:
                     for radek in range(self.pocet_hracu):
                         if self.hraci_plocha[radek][sloupec]["hodnota"] <= 9 and self.hraci_plocha[radek][sloupec][
                             "karta"] != "Čarodějnice":
-                            self.hraci_plocha[radek][sloupec] = {
-            "sloupec": 0,
-            "radek": 0,
-            "karta": "volne",
-            "stav": 0,
-            "hrac": "jmeno",
-            "hodnota": 0}
+                            self.reset_pole(radek, sloupec)
                 for radek in range(self.pocet_hracu):
                     if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
                         for hrac in self.hraci:
@@ -421,6 +403,8 @@ class Hra:
                 hrac.body = 0
             print("")
 
+    def reset_pole(self, radek, sloupec):
+        self.hraci_plocha[radek][sloupec] = {"sloupec": 0, "radek": 0, "karta": "volne", "stav": 0, "hrac": "jmeno", "hodnota": 0}
     def vylozena_karta(self, sloupec, karta, hrac_jmeno):
         """vylozena_karta ma za funkci zkontrolovat, zda lze opravdu vlozit kartu na urcene misto a provest spojene akce"""
         sloupec = sloupec - 1
@@ -499,13 +483,7 @@ class Hra:
                 self.hraci_plocha[volne_misto][prohledavany_sloupec] =(
                     self.hraci_plocha)[radek][sloupec]
                 self.hraci_plocha[radek][sloupec] = self.hraci_plocha[radek + 1][sloupec]
-                self.hraci_plocha[radek + 1][sloupec] = {
-            "sloupec": 0,
-            "radek": 0,
-            "karta": "volne",
-            "stav": 0,
-            "hrac": "jmeno",
-            "hodnota": 0}
+                self.reset_pole(radek + 1, sloupec)
                 if volne_misto != 0:
                     self.otoceni_karty(volne_misto - 1, prohledavany_sloupec)
 
@@ -515,13 +493,7 @@ class Hra:
             # odkládací balíček svého majitele.
             # Nové kartě, položené pod již odkrytého Mordýře se nestane nic.
             print("mordyr zamordoval vlozenou kartu")
-            self.hraci_plocha[radek + 1][sloupec] = {
-            "sloupec": 0,
-            "radek": 0,
-            "karta": "volne",
-            "stav": 0,
-            "hrac": "jmeno",
-            "hodnota": 0}
+            self.reset_pole(radek + 1, sloupec)
 
         elif self.hraci_plocha[radek][sloupec]["karta"] == "Bouře":
             # Je-li odkryta Bouře, tak již nemůže být do tohoto sloupce
