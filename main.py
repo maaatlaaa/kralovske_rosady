@@ -203,7 +203,8 @@ class Hra:
                 skore_specialni = 0
                 skore_specialni_negativni = 0
                 print("hrac ma vsechny nazvy karet")
-                serazene_karty = sorted(hrac_x.cilove_karty, key=lambda karta_razeni: karta_razeni.hodnota, reverse=True)
+                serazene_karty = sorted(hrac_x.cilove_karty,
+                                        key=lambda karta_razeni: karta_razeni.hodnota, reverse=True)
                 cilove_karty_nazvy.clear()
                 for karta in serazene_karty:
                     if karta.nazev in cilove_karty_nazvy:
@@ -234,7 +235,7 @@ class Hra:
 
         for sloupec in range(self.pocet_hracu):
             for radek in range(self.pocet_hracu):
-                self.reset_pole(sloupec, radek)
+                self.reset_pole(radek, sloupec)
 
     def kolo(self):
         """Kolo:
@@ -261,7 +262,8 @@ class Hra:
 
     def plna_hraci_plocha(self):
         """ funkce kontroluje, zda je hraci plocha plna"""
-        return all(all(policko["karta"] != "volne" for policko in radek) for radek in self.hraci_plocha)
+        return all(all(policko["karta"] != "volne" for policko in radek)
+                   for radek in self.hraci_plocha)
 
     def male_vyhodnoceni(self):
         """male vyhodnoceni se spousti po kazdem kole,
@@ -292,10 +294,12 @@ class Hra:
                     self.hraci_plocha[radek][sloupec]["karta"] = str(
                         self.hraci_plocha[radek][sloupec]["radek"]
                     )
-                    self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["sloupec"]
+                    self.hraci_plocha[radek][sloupec]["hodnota"] =(
+                        self.hraci_plocha)[radek][sloupec]["sloupec"]
 
                 print(self.hraci_plocha[radek][sloupec]["karta"] + ": " + str(
-                    self.hraci_plocha[radek][sloupec]["hodnota"]) + ": " + self.hraci_plocha[radek][sloupec]["hrac"])
+                    self.hraci_plocha[radek][sloupec]["hodnota"]) + ": " +
+                      self.hraci_plocha[radek][sloupec]["hrac"])
 
             self.vypis()
             if vyskyt_musketyru == 0:
@@ -305,8 +309,9 @@ class Hra:
                             self.reset_pole(radek, sloupec)
                 elif vyskyt_carodejnice == 1:
                     for radek in range(self.pocet_hracu):
-                        if self.hraci_plocha[radek][sloupec]["hodnota"] <= 9 and self.hraci_plocha[radek][sloupec][
-                            "karta"] != "Čarodějnice":
+                        if (self.hraci_plocha[radek][sloupec]["hodnota"] <= 9
+                                and self.hraci_plocha[radek][sloupec][
+                            "karta"] != "Čarodějnice"):
                             self.reset_pole(radek, sloupec)
                 for radek in range(self.pocet_hracu):
                     if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
@@ -336,16 +341,19 @@ class Hra:
 
                 for radek in range(self.pocet_hracu):
                     if self.hraci_plocha[radek][sloupec]["karta"] == "Poustevník":
-                        self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] - (
-                                    self.pocet_hracu - radek - 1)
+                        self.hraci_plocha[radek][sloupec]["hodnota"] =(
+                                self.hraci_plocha[radek][sloupec]["hodnota"] - (
+                                    self.pocet_hracu - radek - 1))
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Paleček":
-                        self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] + (
-                                    self.pocet_hracu - radek - 1) * 3
+                        self.hraci_plocha[radek][sloupec]["hodnota"] =(
+                                self.hraci_plocha[radek][sloupec]["hodnota"] + (
+                                    self.pocet_hracu - radek - 1) * 3)
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Dvojník":
                         for radek_x in range(radek + 1, self.pocet_hracu):
                             if (self.hraci_plocha[radek_x][sloupec]["karta"] != "Dvojník"
                                     and self.hraci_plocha[radek_x][sloupec]["karta"] != "volne"):
-                                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek_x][sloupec]["hodnota"]
+                                self.hraci_plocha[radek][sloupec]["hodnota"] =(
+                                    self.hraci_plocha)[radek_x][sloupec]["hodnota"]
                                 break
 
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
@@ -356,7 +364,8 @@ class Hra:
                     for hrac_jmeno in vyskyt_draka:
                         for radek in range(self.pocet_hracu):
                             if hrac_jmeno != self.hraci_plocha[radek][sloupec]["hrac"]:
-                                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] - 2
+                                self.hraci_plocha[radek][sloupec]["hodnota"] =(
+                                        self.hraci_plocha[radek][sloupec]["hodnota"] - 2)
 
                 # scitani hodnot
                 for radek in range(self.pocet_hracu):
@@ -365,7 +374,8 @@ class Hra:
                             hrac.set_body_kolo(self.hraci_plocha[radek][sloupec]["hodnota"])
 
                 if vyskyt_zebraka != 1:
-                    serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=True)
+                    serazeni_hraci = sorted(self.hraci,
+                                            key=lambda hrac_x: hrac_x.body, reverse=True)
                     if serazeni_hraci[0].body == serazeni_hraci[1].body:
                         for radek in range(self.pocet_hracu):
                             if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
@@ -375,7 +385,8 @@ class Hra:
                                 print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
                                 break
                 else:
-                    serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=False)
+                    serazeni_hraci = sorted(self.hraci,
+                                            key=lambda hrac_x: hrac_x.body, reverse=False)
                     if serazeni_hraci[0].body == serazeni_hraci[1].body:
                         for radek in range(self.pocet_hracu - 1, -1, -1):
                             if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
@@ -386,7 +397,8 @@ class Hra:
                                 break
 
             else:
-                serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=True)
+                serazeni_hraci = sorted(self.hraci,
+                                        key=lambda hrac_x: hrac_x.body, reverse=True)
                 if serazeni_hraci[0].body == serazeni_hraci[1].body:
                     for radek in range(self.pocet_hracu):
                         if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
@@ -404,9 +416,18 @@ class Hra:
             print("")
 
     def reset_pole(self, radek, sloupec):
-        self.hraci_plocha[radek][sloupec] = {"sloupec": 0, "radek": 0, "karta": "volne", "stav": 0, "hrac": "jmeno", "hodnota": 0}
+        """resetovani pole daneho v argumentech"""
+        self.hraci_plocha[radek][sloupec] = {
+            "sloupec": 0,
+            "radek": 0,
+            "karta": "volne",
+            "stav": 0,
+            "hrac": "jmeno",
+            "hodnota": 0 }
+
     def vylozena_karta(self, sloupec, karta, hrac_jmeno):
-        """vylozena_karta ma za funkci zkontrolovat, zda lze opravdu vlozit kartu na urcene misto a provest spojene akce"""
+        """vylozena_karta ma za funkci zkontrolovat,
+        zda lze opravdu vlozit kartu na urcene misto a provest spojene akce"""
         sloupec = sloupec - 1
         status = 1  # status 1 nejde vlozit do sloupce, status 2 uspesne vlozen
         for radek in range(self.pocet_hracu):
