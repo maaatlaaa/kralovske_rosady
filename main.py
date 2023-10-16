@@ -272,6 +272,7 @@ class Hra:
     def male_vyhodnoceni(self):
         """male vyhodnoceni se spousti po kazdem kole,
             kde se rozhodne, kteri hraci dostali ktere sloupce"""
+        # odkyti zbyvajich karet v poslednich radcich
         for sloupec in range(self.pocet_hracu):
             self.hraci_plocha[self.pocet_hracu - 1][sloupec]["stav"] = 2
 
@@ -359,10 +360,10 @@ class Hra:
                         self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] + (
                                     self.pocet_hracu - radek - 1) * 3
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Dvojník":
-                        for r in range(radek + 1, self.pocet_hracu):
-                            if (self.hraci_plocha[r][sloupec]["karta"] != "Dvojník"
-                                    and self.hraci_plocha[r][sloupec]["karta"] != "volne"):
-                                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[r][sloupec]["hodnota"]
+                        for radek_x in range(radek + 1, self.pocet_hracu):
+                            if (self.hraci_plocha[radek_x][sloupec]["karta"] != "Dvojník"
+                                    and self.hraci_plocha[radek_x][sloupec]["karta"] != "volne"):
+                                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek_x][sloupec]["hodnota"]
                                 break
 
                     elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
@@ -592,7 +593,7 @@ class Hra:
                     if stav == 1:
                         print("zabrane", end="\t")
                     else:
-                        karta_info = f'{karta}: {hodnota}: {hrac}'
+                        karta_info = f'[{karta}:{hodnota}:{hrac}:{stav}]'
                         print(karta_info, end="\t")
             print("\n" + "-" * 8 * self.pocet_hracu)
 
