@@ -309,42 +309,17 @@ class Hra:
                 self.scitani_hodnot()
 
                 if vyskyt_karet["zebrak"] != 0:
-                    serazeni_hraci = sorted(self.hraci,
-                                            key=lambda hrac_x: hrac_x.body, reverse=True)
-                    if serazeni_hraci[0].body == serazeni_hraci[1].body:
-                        for radek in range(self.pocet_hracu):
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
-                                print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
-                                break
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
-                                print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
-                                break
+                    vitez = self.urceni_viteze(sloupec, 1)
+
                 else:
-                    serazeni_hraci = sorted(self.hraci,
-                                            key=lambda hrac_x: hrac_x.body, reverse=False)
-                    if serazeni_hraci[0].body == serazeni_hraci[1].body:
-                        for radek in range(self.pocet_hracu - 1, -1, -1):
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
-                                print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
-                                break
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
-                                print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
-                                break
+                    vitez = self.urceni_viteze(sloupec, 0)
 
             else:
-                serazeni_hraci = sorted(self.hraci,
-                                        key=lambda hrac_x: hrac_x.body, reverse=True)
-                if serazeni_hraci[0].body == serazeni_hraci[1].body:
-                    for radek in range(self.pocet_hracu):
-                        if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
-                            print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
-                            break
-                        if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
-                            print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
-                            break
-            print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
+                vitez = self.urceni_viteze(sloupec, 0)
+
+            print(f"vyherce sloupce {sloupec} je {vitez.jmeno}")
             self.vypis()
-            serazeni_hraci[0].pridej_cilovou_kartu(self.hlavicka_hraci_plochy[sloupec])
+            vitez.pridej_cilovou_kartu(self.hlavicka_hraci_plochy[sloupec])
 
             for hrac in self.hraci:
                 hrac.body = 0
@@ -437,6 +412,27 @@ class Hra:
                 if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
                     hrac.set_body_kolo(self.hraci_plocha[radek][sloupec]["hodnota"])
 
+    def urceni_viteze(self, sloupec, zebrak):
+        if zebrak == 1:
+            serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=True)
+            if serazeni_hraci[0].body == serazeni_hraci[1].body:
+                for radek in range(self.pocet_hracu):
+                    if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
+                        print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
+                        return serazeni_hraci[0]
+                    if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
+                        print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
+                        return serazeni_hraci[1]
+
+        serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=False)
+        if serazeni_hraci[0].body == serazeni_hraci[1].body:
+            for radek in range(self.pocet_hracu - 1, -1, -1):
+                if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
+                    print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
+                    return serazeni_hraci[1]
+                if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
+                    print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
+                    return serazeni_hraci[0]
 
     def reset_pole(self, radek, sloupec):
         """resetovani pole daneho v argumentech"""
