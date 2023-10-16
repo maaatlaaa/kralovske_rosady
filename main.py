@@ -44,73 +44,54 @@ class CilovaKarta:
         def __init__(self, jmeno, vek):
             self.jmeno = jmeno
             self.vek = vek
-            self.balicek = []
+            self.balicek = self.vytvoreni_balicku()
             self.body = 0
-            self.body_kolo = 0
-            self.cilove_karty = []  
+            self.cilove_karty = []
             self.princ = 0
             self.panos = 0
 
-            # vytvareni karet
+        def vytvoreni_balicku(self):
             """
-            typ:
-            1 - bez specialni schopnosti
-            2 - vyssi hodnota podle toho, kde je
-            3 - karty s ihned akci
-            4 - karty s akci az pri vyhodnocovani
+            vytvari balicek a rovnou ho zamicha
+            :return: zamichany balicek
             """
-            karta = Karta(1, "Král", "", 20)
-            self.balicek.append(karta)
-            karta = Karta(1, "Královna", "", 16)
-            self.balicek.append(karta)
-            karta = Karta(1, "Julie", "", 14)
-            self.balicek.append(karta)
-            karta = Karta(2, "Alchymista", "", 8)
-            self.balicek.append(karta)
-            karta = Karta(2, "Šermíř", "", 8)
-            self.balicek.append(karta)
-            karta = Karta(2, "Statkář", "", 8)
-            self.balicek.append(karta)
-            karta = Karta(2, "Kupec", "", 8)
-            self.balicek.append(karta)
-            karta = Karta(2, "Kardinál", "", 8)
-            self.balicek.append(karta)
-            karta = Karta(2, "Trubadúr", "", 8)
-            self.balicek.append(karta)
-            karta = Karta(3, "Objevitel", "", 13)
-            self.balicek.append(karta)
-            karta = Karta(3, "Mordýř", "", 9.5)
-            self.balicek.append(karta)
-            karta = Karta(3, "Bouře", "", 9)
-            self.balicek.append(karta)
-            karta = Karta(3, "Převlek", "", 0)
-            self.balicek.append(karta)
-            karta = Karta(3, "Zrádce", "", 10)
-            self.balicek.append(karta)
-            karta = Karta(4, "Mušketýři", "", 11)
-            self.balicek.append(karta)
-            karta = Karta(4, "Mág", "", 7)
-            self.balicek.append(karta)
-            karta = Karta(4, "Čarodějnice", "", 1)
-            self.balicek.append(karta)
-            karta = Karta(4, "Princ", "", 14)
-            self.balicek.append(karta)
-            karta = Karta(4, "Panoš", "", 2)
-            self.balicek.append(karta)
-            karta = Karta(4, "Poustevník", "", 12)
-            self.balicek.append(karta)
-            karta = Karta(4, "Paleček", "", 2)
-            self.balicek.append(karta)
-            karta = Karta(4, "Dvojník", "", None)
-            self.balicek.append(karta)
-            karta = Karta(4, "Drak", "", 11)
-            self.balicek.append(karta)
-            karta = Karta(4, "Romeo", "", 5)
-            self.balicek.append(karta)
-            karta = Karta(4, "Žebrák", "", 4)
-            self.balicek.append(karta)
-            self.balicek_zalozni = self.balicek
-            self.zamichat()
+            balicek = []
+            # vytvareni karet 1 - bez specialni schopnosti 2 - vyssi hodnota podle toho, kde je
+            # 3 - karty s ihned akci 4 - karty s akci az pri vyhodnocovani
+            self.pridej_kartu(balicek, "Král", "", 20)
+            self.pridej_kartu(balicek, "Královna", "", 16)
+            self.pridej_kartu(balicek, "Julie", "", 14)
+            self.pridej_kartu(balicek, "Alchymista", "", 8)
+            self.pridej_kartu(balicek, "Šermíř", "", 8)
+            self.pridej_kartu(balicek, "Statkář", "", 8)
+            self.pridej_kartu(balicek, "Kupec", "", 8)
+            self.pridej_kartu(balicek, "Kardinál", "", 8)
+            self.pridej_kartu(balicek, "Trubadúr", "", 8)
+            self.pridej_kartu(balicek, "Objevitel", "", 13)
+            self.pridej_kartu(balicek, "Mordýř", "", 9.5)
+            self.pridej_kartu(balicek, "Bouře", "", 9)
+            self.pridej_kartu(balicek, "Převlek", "", 0)
+            self.pridej_kartu(balicek, "Zrádce", "", 10)
+            self.pridej_kartu(balicek, "Mušketýři", "", 11)
+            self.pridej_kartu(balicek, "Mág", "", 7)
+            self.pridej_kartu(balicek, "Čarodějnice", "", 1)
+            self.pridej_kartu(balicek, "Princ", "", 14)
+            self.pridej_kartu(balicek, "Panoš", "", 2)
+            self.pridej_kartu(balicek, "Poustevník", "", 12)
+            self.pridej_kartu(balicek, "Paleček", "", 2)
+            self.pridej_kartu(balicek, "Dvojník", "", None)
+            self.pridej_kartu(balicek, "Drak", "", 11)
+            self.pridej_kartu(balicek,  "Romeo", "", 5)
+            self.pridej_kartu(balicek, "Žebrák", "", 4)
+            random.shuffle(balicek)
+
+            return balicek
+
+        @staticmethod
+        def pridej_kartu(balicek, nazev, popis, hodnota):
+            """pridava kartu do daneho balicku"""
+            karta = Karta(nazev, popis, hodnota)
+            balicek.append(karta)
 
         def get_jmeno(self):
             """
@@ -118,21 +99,18 @@ class CilovaKarta:
             """
             return self.jmeno
 
-        def zamichat(self):
-            """
-            zamichava svuj balicek
-            """
-            random.shuffle(self.balicek)
-
         def karty_v_ruce(self):
             """
-            vypise sve karty v ruce, pokud nema dostatecny pocet - 3, napoji na svuj balicek nove karty
+            vypise sve karty v ruce,
+            pokud nema dostatecny pocet tj. 3, napoji na svuj balicek nove karty
             """
             if len(self.balicek) < 3:
                 print("dosel balicek")
-                self.balicek_zalozni.remove(self.balicek[0])
-                self.balicek_zalozni.remove(self.balicek[1])
-                self.balicek = self.balicek + self.balicek_zalozni
+                balicek_zalozni = self.vytvoreni_balicku()
+                balicek_zalozni.remove(self.balicek[0])
+                balicek_zalozni.remove(self.balicek[1])
+
+                self.balicek = self.balicek + balicek_zalozni
 
             return f"{self.balicek[0].nazev} + {self.balicek[1].nazev} + {self.balicek[2].nazev}"
 
@@ -167,15 +145,15 @@ class CilovaKarta:
 
         def set_body_kolo(self, plus_body):
             """hracovi body za kolo"""
-            self.body_kolo = self.body_kolo + plus_body
+            self.body = self.body + plus_body
 
         def reset_body_kolo(self):
             """resetovani bodu za kolo"""
-            self.body_kolo = 0
+            self.body= 0
 
         def get_body_kolo(self):
             """vraci pocet bodu, ktere hrac ziskal v kole"""
-            return self.body_kolo
+            return self.body
 
         def pridej_cilovou_kartu(self, nova_cilova_karta):
             """pridava hraci vyhranou cilovou kartu"""
