@@ -114,7 +114,8 @@ class Hrac:
 
     def set_body_kolo(self, plus_body):
         """hracovi body za kolo"""
-        self.body = self.body + plus_body
+        if isinstance(plus_body, int):
+            self.body = self.body + plus_body
 
     def pridej_cilovou_kartu(self, nova_cilova_karta):
         """pridava hraci vyhranou cilovou kartu"""
@@ -250,7 +251,7 @@ class Hra:
         pokud je hraci plocha plna, konec"""
         self.start_kola()
 
-        while True:
+        while not self.plna_hraci_plocha():
             for hrac_x in self.hraci:
                 self.vypis()
                 print("hraje " + hrac_x.jmeno)
@@ -261,19 +262,12 @@ class Hra:
                 self.vylozena_karta(volba_sloupce, vylozena_karta, hrac_x.jmeno)
                 if self.plna_hraci_plocha():
                     break
-            if self.plna_hraci_plocha():
-                break
 
         self.male_vyhodnoceni()
 
     def plna_hraci_plocha(self):
         """ funkce kontroluje, zda je hraci plocha plna"""
-        for radek in range(self.pocet_hracu):
-            for sloupec in range(self.pocet_hracu):
-                if self.hraci_plocha[radek][sloupec]["karta"] == "volne":
-                    return False
-        print("plna hraci plocha")
-        return True
+        return all(all(policko["karta"] != "volne" for policko in radek) for radek in self.hraci_plocha)
 
     def male_vyhodnoceni(self):
         """male vyhodnoceni se spousti po kazdem kole,
@@ -396,20 +390,20 @@ class Hra:
                     serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=True)
                     if serazeni_hraci[0].body == serazeni_hraci[1].body:
                         for radek in range(self.pocet_hracu):
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno():
+                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
                                 print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
                                 break
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno():
+                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
                                 print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
                                 break
                 else:
                     serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=False)
                     if serazeni_hraci[0].body == serazeni_hraci[1].body:
                         for radek in range(self.pocet_hracu - 1, -1, -1):
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno():
+                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
                                 print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
                                 break
-                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno():
+                            if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
                                 print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
                                 break
 
@@ -417,13 +411,13 @@ class Hra:
                 serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=True)
                 if serazeni_hraci[0].body == serazeni_hraci[1].body:
                     for radek in range(self.pocet_hracu):
-                        if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno():
+                        if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
                             print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
                             break
-                        if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno():
+                        if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
                             print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
                             break
-            print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno()}")
+            print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
             self.vypis()
             serazeni_hraci[0].pridej_cilovou_kartu(self.hlavicka_hraci_plochy[sloupec])
 
@@ -460,22 +454,22 @@ class Hra:
         self.hraci_plocha[radek][sloupec]["stav"] = 2
         # je karta ve sloupci s bonus body?
         if (self.hraci_plocha[radek][sloupec]["karta"] == "Alchymista"
-                and self.hlavicka_hraci_plochy[sloupec].jmeno() == "Alchymie"):
+                and self.hlavicka_hraci_plochy[sloupec].nazev == "Alchymie"):
             self.hraci_plocha[radek][sloupec]["hodnota"] = 12
         elif (self.hraci_plocha[radek][sloupec]["karta"] == "Šermíř"
-              and self.hlavicka_hraci_plochy[sloupec].jmeno() == "Šerm"):
+              and self.hlavicka_hraci_plochy[sloupec].nazev == "Šerm"):
             self.hraci_plocha[radek][sloupec]["hodnota"] = 12
         elif (self.hraci_plocha[radek][sloupec]["karta"] == "Statkář"
-              and self.hlavicka_hraci_plochy[sloupec].jmeno() == "Rolnictví"):
+              and self.hlavicka_hraci_plochy[sloupec].nazev == "Rolnictví"):
             self.hraci_plocha[radek][sloupec]["hodnota"] = 12
         elif (self.hraci_plocha[radek][sloupec]["karta"] == "Kupec"
-              and self.hlavicka_hraci_plochy[sloupec].jmeno() == "Obchod"):
+              and self.hlavicka_hraci_plochy[sloupec].nazev == "Obchod"):
             self.hraci_plocha[radek][sloupec]["hodnota"] = 12
         elif (self.hraci_plocha[radek][sloupec]["karta"] == "Kardinál"
-              and self.hlavicka_hraci_plochy[sloupec].jmeno() == "Náboženství"):
+              and self.hlavicka_hraci_plochy[sloupec].nazev == "Náboženství"):
             self.hraci_plocha[radek][sloupec]["hodnota"] = 12
         elif (self.hraci_plocha[radek][sloupec]["karta"] == "Trubadúr"
-              and self.hlavicka_hraci_plochy[sloupec].jmeno() == "Hudba"):
+              and self.hlavicka_hraci_plochy[sloupec].nazev == "Hudba"):
             self.hraci_plocha[radek][sloupec]["hodnota"] = 12
 
         # karty typu - po otoceni akce
@@ -554,7 +548,7 @@ class Hra:
             # která má vliv na braní dobytých cílových karet, tak je tato schopnost platná
             print("odkryta karta boure")
             for hrac in self.hraci:
-                if hrac.jmeno() == self.hraci_plocha[radek][sloupec]["hrac"]:
+                if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
                     self.vypis()
                     print(hrac.karty_v_ruce())
                     if input("chces pod prevlek dat nejakou svou kartu? [y/n]") == "y":
@@ -567,7 +561,7 @@ class Hra:
         elif self.hraci_plocha[radek][sloupec]["karta"] == "Zrádce":
             print("zradce se pripravuje k uderu")
             for hrac in self.hraci:
-                if hrac.jmeno() == self.hraci_plocha[radek][sloupec]["hrac"]:
+                if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
                     self.vypis()
                     if input("chces prohodit nejake dve Cilove karty? [y/n]") == "y":
                         for i in self.hlavicka_hraci_plochy:
