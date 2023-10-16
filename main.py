@@ -283,16 +283,11 @@ class Hra:
             # pokud musketyr neni ve hre
             if vyskyt_karet["musketyr"] == 0:
                 # odstraneni karet v dusledku akci Maga nebo Carodejnice
+
                 if vyskyt_karet["mag"] == 1:
-                    for radek in range(self.pocet_hracu):
-                        if self.hraci_plocha[radek][sloupec]["hodnota"] >= 10:
-                            self.reset_pole(radek, sloupec)
+                    self.mag_akce(sloupec)
                 elif vyskyt_karet["carodejnice"] == 1:
-                    for radek in range(self.pocet_hracu):
-                        if (self.hraci_plocha[radek][sloupec]["hodnota"] <= 9
-                                and self.hraci_plocha[radek][sloupec][
-                            "karta"] != "Čarodějnice"):
-                            self.reset_pole(radek, sloupec)
+                    self.carodejnice_akce(sloupec)
 
                 # vyskyt prince a panose
                 self.vyskyt_karet(sloupec, 1)
@@ -306,15 +301,14 @@ class Hra:
 
 
                 # scitani hodnot
-                self.scitani_hodnot()
-
+                self.scitani_hodnot(sloupec)
                 if vyskyt_karet["zebrak"] != 0:
                     vitez = self.urceni_viteze(sloupec, 1)
-
                 else:
                     vitez = self.urceni_viteze(sloupec, 0)
 
             else:
+                self.scitani_hodnot(sloupec)
                 vitez = self.urceni_viteze(sloupec, 0)
 
             print(f"vyherce sloupce {sloupec} je {vitez.jmeno}")
@@ -405,8 +399,22 @@ class Hra:
                     self.hraci_plocha[radek][sloupec]["hodnota"] = (
                             self.hraci_plocha[radek][sloupec]["hodnota"] - 2)
 
+    def mag_akce(self, sloupec):
+        """
+        aplikuje akci maga
+        """
+        for radek in range(self.pocet_hracu):
+            if self.hraci_plocha[radek][sloupec]["hodnota"] >= 10:
+                self.reset_pole(radek, sloupec)
 
-    def scitani_hodnot(self):
+    def carodejnice_akce(self, sloupec):
+        for radek in range(self.pocet_hracu):
+            if (self.hraci_plocha[radek][sloupec]["hodnota"] <= 9
+                    and self.hraci_plocha[radek][sloupec][
+                        "karta"] != "Čarodějnice"):
+                self.reset_pole(radek, sloupec)
+
+    def scitani_hodnot(self, sloupec):
         for radek in range(self.pocet_hracu):
             for hrac in self.hraci:
                 if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
