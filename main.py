@@ -306,10 +306,7 @@ class Hra:
 
 
                 # scitani hodnot
-                for radek in range(self.pocet_hracu):
-                    for hrac in self.hraci:
-                        if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                            hrac.set_body_kolo(self.hraci_plocha[radek][sloupec]["hodnota"])
+                self.scitani_hodnot()
 
                 if vyskyt_karet["zebrak"] != 0:
                     serazeni_hraci = sorted(self.hraci,
@@ -432,6 +429,14 @@ class Hra:
                 if hrac_jmeno != self.hraci_plocha[radek][sloupec]["hrac"]:
                     self.hraci_plocha[radek][sloupec]["hodnota"] = (
                             self.hraci_plocha[radek][sloupec]["hodnota"] - 2)
+
+
+    def scitani_hodnot(self):
+        for radek in range(self.pocet_hracu):
+            for hrac in self.hraci:
+                if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
+                    hrac.set_body_kolo(self.hraci_plocha[radek][sloupec]["hodnota"])
+
 
     def reset_pole(self, radek, sloupec):
         """resetovani pole daneho v argumentech"""
