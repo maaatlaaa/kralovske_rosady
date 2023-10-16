@@ -276,96 +276,34 @@ class Hra:
         for sloupec in range(self.pocet_hracu):
             # vyhodnocovani sloupce 0, ...
             print("sloupec" + str(sloupec))
-            vyskyt_musketyru = 0
-            vyskyt_magu = 0
-            vyskyt_carodejnice = 0
 
-            for radek in range(self.pocet_hracu):
-
-                if self.hraci_plocha[radek][sloupec]["karta"] == "Mušketýři":
-                    vyskyt_musketyru += 1
-                elif self.hraci_plocha[radek][sloupec]["karta"] == "Mág":
-                    vyskyt_magu += 1
-                elif self.hraci_plocha[radek][sloupec]["karta"] == "Čarodějnice":
-                    vyskyt_carodejnice += 1
-                elif (self.hraci_plocha[radek][sloupec]["karta"] == "Převlek" and
-                      not isinstance(self.hraci_plocha[radek][sloupec]["radek"], int)):
-
-                    self.hraci_plocha[radek][sloupec]["karta"] = str(
-                        self.hraci_plocha[radek][sloupec]["radek"]
-                    )
-                    self.hraci_plocha[radek][sloupec]["hodnota"] =(
-                        self.hraci_plocha)[radek][sloupec]["sloupec"]
-
-                print(self.hraci_plocha[radek][sloupec]["karta"] + ": " + str(
-                    self.hraci_plocha[radek][sloupec]["hodnota"]) + ": " +
-                      self.hraci_plocha[radek][sloupec]["hrac"])
+            vyskyt_karet = self.vyskyt_karet(sloupec, 0)
 
             self.vypis()
-            if vyskyt_musketyru == 0:
-                if vyskyt_magu == 1:
+            # pokud musketyr neni ve hre
+            if vyskyt_karet["musketyr"] == 0:
+                # odstraneni karet v dusledku akci Maga nebo Carodejnice
+                if vyskyt_karet["mag"] == 1:
                     for radek in range(self.pocet_hracu):
                         if self.hraci_plocha[radek][sloupec]["hodnota"] >= 10:
                             self.reset_pole(radek, sloupec)
-                elif vyskyt_carodejnice == 1:
+                elif vyskyt_karet["carodejnice"] == 1:
                     for radek in range(self.pocet_hracu):
                         if (self.hraci_plocha[radek][sloupec]["hodnota"] <= 9
                                 and self.hraci_plocha[radek][sloupec][
                             "karta"] != "Čarodějnice"):
                             self.reset_pole(radek, sloupec)
-                for radek in range(self.pocet_hracu):
-                    if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
-                        for hrac in self.hraci:
-                            if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                                hrac.princ = 1
-                    elif self.hraci_plocha[radek][sloupec]["karta"] == "Panoš":
-                        for hrac in self.hraci:
-                            if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                                hrac.panos = 1
 
+                # vyskyt prince a panose
+                self.vyskyt_karet(sloupec, 1)
                 for hrac in self.hraci:
                     if hrac.get_panos_princ():
                         hrac.cilove_karty.append(self.hlavicka_hraci_plochy[sloupec])
                         break
 
-                vyskyt_julie = 0
-                vyskyt_draka = []
-                vyskyt_zebraka = 0
-                for radek in range(self.pocet_hracu):
-                    if self.hraci_plocha[radek][sloupec]["karta"] == "Julie":
-                        vyskyt_julie = 1
-                    elif self.hraci_plocha[radek][sloupec]["karta"] == "Drak":
-                        vyskyt_draka.append(self.hraci_plocha[radek][sloupec]["hrac"])
-                    elif self.hraci_plocha[radek][sloupec]["karta"] == "Žebrák":
-                        vyskyt_zebraka = 1
+                # vyskyt draka a zebraka a akce zbytku karet
+                vyskyt_karet = self.vyskyt_karet(sloupec, 2)
 
-                for radek in range(self.pocet_hracu):
-                    if self.hraci_plocha[radek][sloupec]["karta"] == "Poustevník":
-                        self.hraci_plocha[radek][sloupec]["hodnota"] =(
-                                self.hraci_plocha[radek][sloupec]["hodnota"] - (
-                                    self.pocet_hracu - radek - 1))
-                    elif self.hraci_plocha[radek][sloupec]["karta"] == "Paleček":
-                        self.hraci_plocha[radek][sloupec]["hodnota"] =(
-                                self.hraci_plocha[radek][sloupec]["hodnota"] + (
-                                    self.pocet_hracu - radek - 1) * 3)
-                    elif self.hraci_plocha[radek][sloupec]["karta"] == "Dvojník":
-                        for radek_x in range(radek + 1, self.pocet_hracu):
-                            if (self.hraci_plocha[radek_x][sloupec]["karta"] != "Dvojník"
-                                    and self.hraci_plocha[radek_x][sloupec]["karta"] != "volne"):
-                                self.hraci_plocha[radek][sloupec]["hodnota"] =(
-                                    self.hraci_plocha)[radek_x][sloupec]["hodnota"]
-                                break
-
-                    elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
-                        if vyskyt_julie == 1:
-                            self.hraci_plocha[radek][sloupec]["hodnota"] = 15
-
-                if len(vyskyt_draka) != 0:
-                    for hrac_jmeno in vyskyt_draka:
-                        for radek in range(self.pocet_hracu):
-                            if hrac_jmeno != self.hraci_plocha[radek][sloupec]["hrac"]:
-                                self.hraci_plocha[radek][sloupec]["hodnota"] =(
-                                        self.hraci_plocha[radek][sloupec]["hodnota"] - 2)
 
                 # scitani hodnot
                 for radek in range(self.pocet_hracu):
@@ -373,7 +311,7 @@ class Hra:
                         if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
                             hrac.set_body_kolo(self.hraci_plocha[radek][sloupec]["hodnota"])
 
-                if vyskyt_zebraka != 1:
+                if vyskyt_karet["zebrak"] != 0:
                     serazeni_hraci = sorted(self.hraci,
                                             key=lambda hrac_x: hrac_x.body, reverse=True)
                     if serazeni_hraci[0].body == serazeni_hraci[1].body:
@@ -414,6 +352,86 @@ class Hra:
             for hrac in self.hraci:
                 hrac.body = 0
             print("")
+
+    def vyskyt_karet(self, sloupec, typ_hledanych_karet):
+        """ kontrola vyskytu karet. Hledane karty se lisi typem hledanych karet"""
+        if typ_hledanych_karet == 0:
+            vyskyt_karet = {"musketyr": 0, "mag": 0, "carodejnice": 0}
+            for radek in range(self.pocet_hracu):
+                if self.hraci_plocha[radek][sloupec]["karta"] == "Mušketýři":
+                    vyskyt_karet["musketyr"] += 1
+                elif self.hraci_plocha[radek][sloupec]["karta"] == "Mág":
+                    vyskyt_karet["mag"] += 1
+                elif self.hraci_plocha[radek][sloupec]["karta"] == "Čarodějnice":
+                    vyskyt_karet["carodejnice"] += 1
+                elif (self.hraci_plocha[radek][sloupec]["karta"] == "Převlek" and
+                      not isinstance(self.hraci_plocha[radek][sloupec]["radek"], int)):
+                    # do "karta" se ulozi nazev karty pod prevlekem
+                    self.hraci_plocha[radek][sloupec]["karta"] = str(
+                        self.hraci_plocha[radek][sloupec]["radek"]
+                    )
+                    # do "hodnota" se ulozi hodnota karty pod prevlekem
+                    self.hraci_plocha[radek][sloupec]["hodnota"] = (
+                        self.hraci_plocha)[radek][sloupec]["sloupec"]
+
+                print(self.hraci_plocha[radek][sloupec]["karta"] + ": " + str(
+                    self.hraci_plocha[radek][sloupec]["hodnota"]) + ": " +
+                      self.hraci_plocha[radek][sloupec]["hrac"])
+
+                return vyskyt_karet
+
+        elif typ_hledanych_karet == 1:
+            for radek in range(self.pocet_hracu):
+                if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
+                    for hrac in self.hraci:
+                        if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
+                            hrac.princ = 1
+                elif self.hraci_plocha[radek][sloupec]["karta"] == "Panoš":
+                    for hrac in self.hraci:
+                        if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
+                            hrac.panos = 1
+
+        vyskyt_karet = {"zebrak": 0}
+        vyskyt_draka = []
+        for radek in range(self.pocet_hracu):
+            if self.hraci_plocha[radek][sloupec]["karta"] == "Drak":
+                vyskyt_draka.append(self.hraci_plocha[radek][sloupec]["hrac"])
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Žebrák":
+                vyskyt_karet["zebrak"] += 1
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Poustevník":
+                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec][
+                                                                   "hodnota"] - self.pocet_hracu - radek - 1
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Paleček":
+                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] + (
+                            self.pocet_hracu - radek - 1) * 3
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Dvojník":
+                for radek_x in range(radek + 1, self.pocet_hracu):
+                    if self.hraci_plocha[radek_x][sloupec]["karta"] != "Dvojník" and \
+                            self.hraci_plocha[radek_x][sloupec]["karta"] != "volne":
+                        self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek_x][sloupec]["hodnota"]
+                        break
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
+                for radek_x in range(self.pocet_hracu):
+                    if self.hraci_plocha[radek_x][sloupec]["karta"] == "Julie" and self.hraci_plocha[radek_x][sloupec][
+                        "hrac"] == self.hraci_plocha[radek][sloupec]["hrac"]:
+                        self.hraci_plocha[radek][sloupec]["hodnota"] = 15
+                        break
+
+        #pokud se nasel nejaky drak, tak rovnou aplikuje efekt
+        if len(vyskyt_draka) != 0:
+            self.drak_akce(sloupec, vyskyt_draka)
+
+        return vyskyt_karet
+
+    def drak_akce(self, sloupec, vyskyt_draka):
+        """
+        aplikuje akci draka v danem sloupci
+        """
+        for hrac_jmeno in vyskyt_draka:
+            for radek in range(self.pocet_hracu):
+                if hrac_jmeno != self.hraci_plocha[radek][sloupec]["hrac"]:
+                    self.hraci_plocha[radek][sloupec]["hodnota"] = (
+                            self.hraci_plocha[radek][sloupec]["hodnota"] - 2)
 
     def reset_pole(self, radek, sloupec):
         """resetovani pole daneho v argumentech"""
