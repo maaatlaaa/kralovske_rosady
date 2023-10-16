@@ -346,13 +346,9 @@ class Hra:
         elif typ_hledanych_karet == 1:
             for radek in range(self.pocet_hracu):
                 if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
-                    for hrac in self.hraci:
-                        if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                            hrac.princ = 1
+                    self.princ_akce(radek, sloupec)
                 elif self.hraci_plocha[radek][sloupec]["karta"] == "Panoš":
-                    for hrac in self.hraci:
-                        if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                            hrac.panos = 1
+                    self.panos_akce(radek, sloupec)
 
         vyskyt_karet = {"zebrak": 0}
         vyskyt_draka = []
@@ -414,6 +410,17 @@ class Hra:
                         "karta"] != "Čarodějnice"):
                 self.reset_pole(radek, sloupec)
 
+    def princ_akce(self, radek, sloupec):
+        """ akce prince """
+        for hrac in self.hraci:
+            if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
+                hrac.princ = 1
+
+    def panos_akce(self, radek, sloupec):
+        """ akce panos """
+        for hrac in self.hraci:
+            if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
+                hrac.panos = 1
     def scitani_hodnot(self, sloupec):
         """
         scita a prirazuje body jednotlivym hracum
