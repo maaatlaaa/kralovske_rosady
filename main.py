@@ -107,6 +107,8 @@ class Hrac:
         """pokud ma hrac panose a prince, automaticky vyhral cely sloupec,
             pokud tomu tak neni, tak se hodnoty pro jistotu vynuluji pro dalsi sloupec"""
         if self.panos == 1 and self.panos == 1:
+            self.panos = 0
+            self.princ = 0
             return True
         self.panos = 0
         self.princ = 0
@@ -521,6 +523,7 @@ class Hra:
                     if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[0].jmeno:
                         print(f"vyherce sloupce {sloupec} je {serazeni_hraci[0].jmeno}")
                         return serazeni_hraci[0]
+            return serazeni_hraci[0]
 
         serazeni_hraci = sorted(self.hraci, key=lambda hrac_x: hrac_x.body, reverse=True)
         if serazeni_hraci[0].body == serazeni_hraci[1].body:
@@ -531,7 +534,7 @@ class Hra:
                 if self.hraci_plocha[radek][sloupec]["hrac"] == serazeni_hraci[1].jmeno:
                     print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
                     return serazeni_hraci[1]
-        return 1
+        return serazeni_hraci[0]
 
     def reset_pole(self, radek, sloupec):
         """resetovani pole daneho v argumentech"""
