@@ -189,6 +189,7 @@ class Hra:
             hra.kolo()
         self.zaverecne_vyhodnoceni()
 
+
     def zaverecne_vyhodnoceni(self):
         """
         konecne vyhodnoceni rozhodujici o vitezi hry
@@ -277,16 +278,16 @@ class Hra:
             # vyhodnocovani sloupce 0, ...
             print("sloupec" + str(sloupec))
 
-            vyskyt_karet = self.vyskyt_karet(sloupec, 0)
+            vyskyt_ridicich_karet = self.vyskyt_ridicich_karet(sloupec)
 
             self.vypis()
             # pokud musketyr neni ve hre
-            if vyskyt_karet["musketyr"] == 0:
+            if vyskyt_ridicich_karet["musketyr"] == 0:
                 # odstraneni karet v dusledku akci Maga nebo Carodejnice
 
-                if vyskyt_karet["mag"] == 1:
+                if vyskyt_ridicich_karet["mag"] == 1:
                     self.mag_akce(sloupec)
-                elif vyskyt_karet["carodejnice"] == 1:
+                elif vyskyt_ridicich_karet["carodejnice"] == 1:
                     self.carodejnice_akce(sloupec)
 
                 # vyskyt prince a panose
@@ -316,34 +317,36 @@ class Hra:
                 hrac.body = 0
             print("")
 
+    def vyskyt_ridicich_karet(self, sloupec):
+        """ kontrola vyskytu karet. Hledane karty se lisi typem hledanych karet"""
+        vyskyt_karet = {"musketyr": 0, "mag": 0, "carodejnice": 0}
+        for radek in range(self.pocet_hracu):
+            if self.hraci_plocha[radek][sloupec]["karta"] == "Mušketýři":
+                vyskyt_karet["musketyr"] += 1
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Mág":
+                vyskyt_karet["mag"] += 1
+            elif self.hraci_plocha[radek][sloupec]["karta"] == "Čarodějnice":
+                vyskyt_karet["carodejnice"] += 1
+            elif (self.hraci_plocha[radek][sloupec]["karta"] == "Převlek" and
+                  not isinstance(self.hraci_plocha[radek][sloupec]["radek"], int)):
+                # do "karta" se ulozi nazev karty pod prevlekem
+                self.hraci_plocha[radek][sloupec]["karta"] = str(
+                    self.hraci_plocha[radek][sloupec]["radek"]
+                )
+                # do "hodnota" se ulozi hodnota karty pod prevlekem
+                self.hraci_plocha[radek][sloupec]["hodnota"] = (
+                    self.hraci_plocha)[radek][sloupec]["sloupec"]
+
+            print(self.hraci_plocha[radek][sloupec]["karta"] + ": " + str(
+                self.hraci_plocha[radek][sloupec]["hodnota"]) + ": " +
+                  self.hraci_plocha[radek][sloupec]["hrac"])
+
+            return vyskyt_karet
+
     def vyskyt_karet(self, sloupec, typ_hledanych_karet):
         """ kontrola vyskytu karet. Hledane karty se lisi typem hledanych karet"""
-        if typ_hledanych_karet == 0:
-            vyskyt_karet = {"musketyr": 0, "mag": 0, "carodejnice": 0}
-            for radek in range(self.pocet_hracu):
-                if self.hraci_plocha[radek][sloupec]["karta"] == "Mušketýři":
-                    vyskyt_karet["musketyr"] += 1
-                elif self.hraci_plocha[radek][sloupec]["karta"] == "Mág":
-                    vyskyt_karet["mag"] += 1
-                elif self.hraci_plocha[radek][sloupec]["karta"] == "Čarodějnice":
-                    vyskyt_karet["carodejnice"] += 1
-                elif (self.hraci_plocha[radek][sloupec]["karta"] == "Převlek" and
-                      not isinstance(self.hraci_plocha[radek][sloupec]["radek"], int)):
-                    # do "karta" se ulozi nazev karty pod prevlekem
-                    self.hraci_plocha[radek][sloupec]["karta"] = str(
-                        self.hraci_plocha[radek][sloupec]["radek"]
-                    )
-                    # do "hodnota" se ulozi hodnota karty pod prevlekem
-                    self.hraci_plocha[radek][sloupec]["hodnota"] = (
-                        self.hraci_plocha)[radek][sloupec]["sloupec"]
 
-                print(self.hraci_plocha[radek][sloupec]["karta"] + ": " + str(
-                    self.hraci_plocha[radek][sloupec]["hodnota"]) + ": " +
-                      self.hraci_plocha[radek][sloupec]["hrac"])
-
-                return vyskyt_karet
-
-        elif typ_hledanych_karet == 1:
+        if typ_hledanych_karet == 1:
             for radek in range(self.pocet_hracu):
                 if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
                     self.princ_akce(radek, sloupec)
@@ -364,17 +367,9 @@ class Hra:
                 self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek][sloupec]["hodnota"] + (
                             self.pocet_hracu - radek - 1) * 3
             elif self.hraci_plocha[radek][sloupec]["karta"] == "Dvojník":
-                for radek_x in range(radek + 1, self.pocet_hracu):
-                    if self.hraci_plocha[radek_x][sloupec]["karta"] != "Dvojník" and \
-                            self.hraci_plocha[radek_x][sloupec]["karta"] != "volne":
-                        self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek_x][sloupec]["hodnota"]
-                        break
+                self.dvojnik_akce(radek, sloupec)
             elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
-                for radek_x in range(self.pocet_hracu):
-                    if self.hraci_plocha[radek_x][sloupec]["karta"] == "Julie" and self.hraci_plocha[radek_x][sloupec][
-                        "hrac"] == self.hraci_plocha[radek][sloupec]["hrac"]:
-                        self.hraci_plocha[radek][sloupec]["hodnota"] = 15
-                        break
+                self.romeo_akce(radek, sloupec)
 
         #pokud se nasel nejaky drak, tak rovnou aplikuje efekt
         if len(vyskyt_draka) != 0:
@@ -421,6 +416,23 @@ class Hra:
         for hrac in self.hraci:
             if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
                 hrac.panos = 1
+
+    def dvojnik_akce(self, radek, sloupec):
+        """ akce pro kartu dvojnik """
+        for radek_x in range(radek + 1, self.pocet_hracu):
+            if self.hraci_plocha[radek_x][sloupec]["karta"] != "Dvojník" and \
+                    self.hraci_plocha[radek_x][sloupec]["karta"] != "volne":
+                self.hraci_plocha[radek][sloupec]["hodnota"] = self.hraci_plocha[radek_x][sloupec]["hodnota"]
+                break
+
+    def romeo_akce(self, radek, sloupec):
+        """ akce pro kartu romeo """
+        for radek_x in range(self.pocet_hracu):
+            if self.hraci_plocha[radek_x][sloupec]["karta"] == "Julie" and self.hraci_plocha[radek_x][sloupec][
+                "hrac"] == self.hraci_plocha[radek][sloupec]["hrac"]:
+                self.hraci_plocha[radek][sloupec]["hodnota"] = 15
+                break
+
     def scitani_hodnot(self, sloupec):
         """
         scita a prirazuje body jednotlivym hracum
