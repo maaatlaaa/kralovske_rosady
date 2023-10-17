@@ -5,14 +5,6 @@ Modul main.py představuje zakladní řídící jednotku pro naši hru.
 import random
 
 
-class Karta:
-    """ class Karta: objekt predstavujici hraci kartu,
-    které postupně hráči vykládají na hrací plochu """
-    def __init__(self, nazev, popis, hodnota):
-        self.hodnota = hodnota
-        self.nazev = nazev
-        self.popis = popis
-
 class Hrac:
     """
     class Hrac je reprezentujici objekt hrajiciho hrace
@@ -66,7 +58,7 @@ class Hrac:
     @staticmethod
     def pridej_kartu(balicek, nazev, popis, hodnota):
         """pridava kartu do daneho balicku"""
-        karta = Karta(nazev, popis, hodnota)
+        karta = {"nazev": nazev, "popis": popis, "hodnota": hodnota}
         balicek.append(karta)
 
     def karty_v_ruce(self):
@@ -82,7 +74,7 @@ class Hrac:
 
             self.balicek = self.balicek + balicek_zalozni
 
-        return f"{self.balicek[0].nazev} + {self.balicek[1].nazev} + {self.balicek[2].nazev}"
+        return " + ".join(karta["nazev"] for karta in self.balicek[:3])
 
     # vrati nazev a hodnotu karty
     def vyloz(self, poradi_karty):
@@ -91,8 +83,8 @@ class Hrac:
             ktera byla vypsana jako ty, co ma hrac v ruce
         :return: nazev a hodnota vylozene karty
         """
-        nazev = self.balicek[poradi_karty - 1].nazev
-        hodnota = self.balicek[poradi_karty - 1].hodnota
+        nazev = self.balicek[poradi_karty - 1]["nazev"]
+        hodnota = self.balicek[poradi_karty - 1]["hodnota"]
         self.balicek.pop(poradi_karty - 1)
         return {"nazev": nazev, "hodnota": hodnota}
 
@@ -115,6 +107,7 @@ class Hrac:
     def pridej_cilovou_kartu(self, nova_cilova_karta):
         """pridava hraci vyhranou cilovou kartu"""
         self.cilove_karty.append(nova_cilova_karta)
+
 
 class HraciPlocha:
     """ HraciPlocha reprezentuje hraci plochu,
@@ -177,7 +170,7 @@ class HraciPlocha:
             "karta": "volne",
             "stav": 0,
             "hrac": "jmeno",
-            "hodnota": 0 }
+            "hodnota": 0}
 
     def plna(self):
         """ funkce kontroluje, zda je hraci plocha plna"""
@@ -235,7 +228,6 @@ class HraciPlocha:
             # do prvniho sloupce vlevo. Tam je jakoby 'nove vlozen'
             self.objevitel_akce(radek, sloupec)
 
-
         elif aktualni_hraci_pole["karta"] == "Mordýř":
             print("mordyr zamordoval vlozenou kartu")
             self.reset_pole(radek + 1, sloupec)
@@ -281,16 +273,35 @@ class HraciPlocha:
 
             return vyskyt_karet
 
-    def vyskyt_karet(self, sloupec, typ_hledanych_karet):
-        """ kontrola vyskytu karet. Hledane karty se lisi typem hledanych karet"""
-
-        if typ_hledanych_karet == 1:
+    def princ_panos(self, sloupec):
+        """ logika resici princ a panos situaci"""
+        vyskyt = []
+        for hrac in self.hraci:
+            princ_panos = {"princ": 0, "panos": 0, "radek": 100, "hrac": hrac.jmeno}
             for radek in range(self.pocet_hracu):
-                if self.hraci_plocha[radek][sloupec]["karta"] == "Princ":
-                    self.princ_akce(radek, sloupec)
-                elif self.hraci_plocha[radek][sloupec]["karta"] == "Panoš":
-                    self.panos_akce(radek, sloupec)
+                if self.hraci_plocha[radek][sloupec]["karta"] == "Princ" and hrac.jmeno == \
+                        self.hraci_plocha[radek][sloupec]["hrac"]:
+                    princ_panos["princ"] = 1
+                    if radek < princ_panos["radek"]:
+                        princ_panos["radek"] = radek
+                elif self.hraci_plocha[radek][sloupec]["karta"] == "Panoš" and hrac.jmeno == \
+                        self.hraci_plocha[radek][sloupec]["hrac"]:
+                    princ_panos["panos"] = 1
+                    if radek < princ_panos["radek"]:
+                        princ_panos["radek"] = radek
+            if princ_panos["princ"] == 1 and princ_panos["panos"] == 1:
+                vyskyt.append(princ_panos)
 
+        vitez = 100
+        nejmensi_radek = 100
+        for vysledek in vyskyt:
+            if vysledek["radek"] < nejmensi_radek:
+                nejmensi_radek = vysledek["radek"]
+                vitez = vysledek["hrac"]
+        return vitez
+
+    def vyskyt_karet(self, sloupec):
+        """ kontrola vyskytu karet. Hledane karty se lisi typem hledanych karet"""
         vyskyt_karet = {"zebrak": 0}
         vyskyt_draka = []
         for radek in range(self.pocet_hracu):
@@ -310,7 +321,7 @@ class HraciPlocha:
             elif self.hraci_plocha[radek][sloupec]["karta"] == "Romeo":
                 self.romeo_akce(radek, sloupec)
 
-        #pokud se nasel nejaky drak, tak rovnou aplikuje efekt
+        # pokud se nasel nejaky drak, tak rovnou aplikuje efekt
         if len(vyskyt_draka) != 0:
             self.drak_akce(sloupec, vyskyt_draka)
 
@@ -344,18 +355,6 @@ class HraciPlocha:
                         "karta"] != "Čarodějnice"):
                 self.reset_pole(radek, sloupec)
 
-    def princ_akce(self, radek, sloupec):
-        """ akce prince """
-        for hrac in self.hraci:
-            if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                hrac.princ = 1
-
-    def panos_akce(self, radek, sloupec):
-        """ akce panos """
-        for hrac in self.hraci:
-            if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
-                hrac.panos = 1
-
     def dvojnik_akce(self, radek, sloupec):
         """ akce pro kartu dvojnik """
         for radek_x in range(radek + 1, self.pocet_hracu):
@@ -369,8 +368,8 @@ class HraciPlocha:
         """ akce pro kartu romeo """
         for radek_x in range(self.pocet_hracu):
             if (self.hraci_plocha[radek_x][sloupec]["karta"] == "Julie"
-                    and self.hraci_plocha[radek_x][sloupec][
-                "hrac"] == self.hraci_plocha[radek][sloupec]["hrac"]):
+                    and self.hraci_plocha[radek_x][sloupec]["hrac"] ==
+                    self.hraci_plocha[radek][sloupec]["hrac"]):
                 self.hraci_plocha[radek][sloupec]["hodnota"] = 15
                 break
 
@@ -445,11 +444,6 @@ class HraciPlocha:
                 if hrac.jmeno == self.hraci_plocha[radek][sloupec]["hrac"]:
                     hrac.set_body_kolo(self.hraci_plocha[radek][sloupec]["hodnota"])
 
-    def odkryti_zbyvajicich_karet(self):
-        """ odkryva zbyvajici karty """
-        for sloupec in range(self.pocet_hracu):
-            self.hraci_plocha[self.pocet_hracu - 1][sloupec]["stav"] = 2
-
     def kdo_driv(self, sloupec, serazeni_hraci, prepinac):
         """ zjistuje, ktery hrac je driv
         ci pozdeji ve sloupecku """
@@ -469,6 +463,7 @@ class HraciPlocha:
                 print(f"vyherce sloupce {sloupec} je {serazeni_hraci[1].jmeno}")
                 return serazeni_hraci[1]
         return serazeni_hraci[0]
+
     def vypis(self):
         """vypis slouzi k prubeznemu nahlidnuti na hraci plochu pomoci terminalu"""
         print("")
@@ -528,8 +523,8 @@ class Hra:
             cilove_karty_nazvy = set()
             skore = 0
             for cilova_karta in hrac_x.cilove_karty:
-                skore += cilova_karta.hodnota
-                cilove_karty_nazvy.add(cilova_karta.nazev)
+                skore += cilova_karta["hodnota"]
+                cilove_karty_nazvy.add(cilova_karta["nazev"])
             if len(cilove_karty_nazvy) == 6:
                 skore_specialni = 0
                 skore_specialni_negativni = 0
@@ -538,12 +533,12 @@ class Hra:
                                         key=lambda karta_razeni: karta_razeni.hodnota, reverse=True)
                 cilove_karty_nazvy.clear()
                 for karta in serazene_karty:
-                    if karta.nazev in cilove_karty_nazvy:
+                    if karta["nazev"] in cilove_karty_nazvy:
                         # uz tam je, pocitame ji k negativnimu skore
                         skore_specialni_negativni += 1
                     else:
                         # neni v mnozine, pricitame k specialnimu skore
-                        cilove_karty_nazvy.add(karta.nazev)
+                        cilove_karty_nazvy.add(karta["nazev"])
                         skore_specialni += karta.hodnota
                 skore_specialni = skore_specialni * 2 - skore_specialni_negativni
                 if skore_specialni > skore:
@@ -582,7 +577,8 @@ class Hra:
         """male vyhodnoceni se spousti po kazdem kole,
             kde se rozhodne, kteri hraci dostali ktere sloupce"""
         # odkyti zbyvajich karet v poslednich radcich
-        self.hraci_plocha.odkryti_zbyvajicich_karet()
+        for sloupec in range(self.pocet_hracu):
+            self.hraci_plocha.hraci_plocha[self.pocet_hracu - 1][sloupec]["stav"] = 2
 
         self.hraci_plocha.vypis()
         for sloupec in range(self.pocet_hracu):
@@ -602,15 +598,17 @@ class Hra:
                     self.hraci_plocha.carodejnice_akce(sloupec)
 
                 # vyskyt prince a panose
-                self.hraci_plocha.vyskyt_karet(sloupec, 1)
-                for hrac in self.hraci:
-                    if hrac.get_panos_princ():
-                        hrac.cilove_karty.append(self.hraci_plocha.hlavicka_hraci_plochy[sloupec])
-                        break
+                vyherce = self.hraci_plocha.princ_panos(sloupec)
+                if vyherce != 100:
+                    for hrac in self.hraci:
+                        if hrac.jmeno == vyherce:
+                            hrac.cilove_karty.append(
+                                self.hraci_plocha.hlavicka_hraci_plochy[sloupec])
+                            break
+                    break
 
                 # vyskyt draka a zebraka a akce zbytku karet
-                vyskyt_karet = self.hraci_plocha.vyskyt_karet(sloupec, 2)
-
+                vyskyt_karet = self.hraci_plocha.vyskyt_karet(sloupec)
 
                 # scitani hodnot
                 self.hraci_plocha.scitani_hodnot(sloupec)
