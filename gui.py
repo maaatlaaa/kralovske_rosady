@@ -23,6 +23,7 @@ pozadi_vyber = pygame.image.load("zdroje/obrazky/pozadi_vyber.png")
 
 obrazovka.fill(bila)
 
+
 # def hlavni menu
 def hlavni_menu():
     pygame.display.set_caption("Královské rošády")
@@ -34,7 +35,7 @@ def hlavni_menu():
     nadpis_rect.center = (sirka//2, vyska//2-245)
 
     # tlacitkaaa
-    tlacitko_hrat_lokal = Button(obrazovka, pozadi_tlacitko, 200, 250, "Hrát lokál", hlavni_font_maly, cerna, tmave_cervena)
+    tlacitko_hrat_lokal = Button(obrazovka, pozadi_tlacitko, 200, 250, "Hrát lokál",hlavni_font_maly, cerna, tmave_cervena)
     tlacitko_hrat_multi = Button(obrazovka, pozadi_tlacitko, 200, 350, "Hrát multiplayer", hlavni_font_maly, cerna, tmave_cervena)
     tlacitko_sin_slavy = Button(obrazovka, pozadi_tlacitko, 200, 450, "Sál slávy", hlavni_font_maly, cerna, tmave_cervena)
     tlacitko_odejit = Button(obrazovka, pozadi_tlacitko, 200, 550, "Odejít", hlavni_font_maly, cerna, tmave_cervena)
@@ -99,13 +100,45 @@ def sal_slavy():
                 if tlacitko_zpet.check_for_input(mys_pozice):
                     hlavni_menu()
                 if tlacitko_vsechny_hry.check_for_input(mys_pozice):
-                    print("jdeme hrat multiplayer")
-
+                    vsechnyHry()
 
         # obnova obrazovky
         obrazovka.blit(nadpis, nadpis_rect)
         pygame.display.update()
 
+def vsechnyHry():
+    pygame.display.set_caption("Královské rošády - Všechny hry")
+    pozadi_hlavni = pygame.image.load("zdroje/obrazky/pozadi_vyber.png")
+    pozadi_tlacitko = pygame.image.load("zdroje/obrazky/pozadi_tlacitko.png")
+
+    nadpis = hlavni_font.render("Všechny hry", True, cerna)
+    nadpis_rect = nadpis.get_rect()
+    nadpis_rect.center = (sirka // 2, vyska // 2 - 245)
+
+    # tlacitkaaa
+    tlacitko_zpet = Button(obrazovka, pozadi_tlacitko, 70, 100, "Zpátky", hlavni_font_maly, cerna, tmave_cervena)
+
+    konec = False
+    # hlavni herni cyklus
+    while not konec:
+        obrazovka.blit(pozadi_hlavni, (0, 0))
+
+        mys_pozice = pygame.mouse.get_pos()
+
+        for tlacitko in [tlacitko_zpet]:
+            tlacitko.change_color(mys_pozice)
+            tlacitko.update()
+
+        for udalost in pygame.event.get():
+            if udalost.type == pygame.QUIT:
+                konec = True
+            if udalost.type == pygame.MOUSEBUTTONDOWN:
+                if tlacitko_zpet.check_for_input(mys_pozice):
+                    sal_slavy()
+
+        # obnova obrazovky
+        obrazovka.blit(nadpis, nadpis_rect)
+        pygame.display.update()
 
 hlavni_menu()
 # konec
