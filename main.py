@@ -9,9 +9,8 @@ class Hrac:
     """
     class Hrac je reprezentujici objekt hrajiciho hrace
     """
-    def __init__(self, jmeno, vek):
+    def __init__(self, jmeno):
         self.jmeno = jmeno
-        self.vek = vek
         self.balicek = self.vytvoreni_balicku()
         self.body = 0
         self.cilove_karty = []
@@ -499,20 +498,19 @@ class HraciPlocha:
 class Hra:
     """tato trida odkazuje na objekt ridici celou hru"""
     def __init__(self, hraci):
-        self.hraci = hraci
-        pocet_hracu = len(hraci)
-        if pocet_hracu not in range(2, 7):
-            raise ValueError("Neplatný počet hráčů. Povolený rozsah je 2 až 6 hráčů.")
-        self.pocet_hracu = pocet_hracu
-
+        self.hraci = []
+        for hrac in hraci:
+            self.hraci.append(Hrac(hrac))
+        self.pocet_hracu = len(hraci)
         self.hraci_plocha = HraciPlocha(self.hraci)
+        self.start_hry()
 
     def start_hry(self):
         """
         start hry je hlavni ridici smycka pro hru
         """
         for _ in range(6):
-            hra.kolo()
+            self.kolo()
         self.zaverecne_vyhodnoceni()
 
     def zaverecne_vyhodnoceni(self):
@@ -641,12 +639,3 @@ class Hra:
         if serazeni_hraci[0].body == serazeni_hraci[1].body:
             return self.hraci_plocha.kdo_driv(sloupec, serazeni_hraci, 0)
         return serazeni_hraci[0]
-
-
-hrac1 = Hrac("Matous", 21)
-hrac2 = Hrac("Sarinka", 20)
-hrac3 = Hrac("Natka", 11)
-hrajici_hraci = [hrac1, hrac2, hrac3]
-
-hra = Hra(hrajici_hraci)
-hra.start_hry()
