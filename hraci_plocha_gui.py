@@ -32,7 +32,7 @@ vedlejsi_font = pygame.font.SysFont("kokila", 40)
 obrazovka.fill(bila)
 
 # pocet_hracu = int(input())
-pocet_hracu = 5
+pocet_hracu = 3
 vyska = vyska - 40
 
 velikost_karet = 150
