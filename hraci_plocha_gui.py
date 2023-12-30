@@ -1,96 +1,89 @@
 import pygame
 
-# inicializace
-pygame.init()
 
-# Nastavení režimu a vytvoření okna
-fullscreen = True  # Nastavte na True pro fullscreen
-if fullscreen:
-    obrazovka = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    sirka, vyska = pygame.display.get_surface().get_size()
-    obdelnik = pygame.Rect(20, 20, sirka-40, vyska-40)
-    print(sirka, vyska)
-else:
-    # vytvoreni obrazovky
-    sirka = 1500
-    vyska = 1050
-    obdelnik = pygame.Rect(50, 50, 1400, 900)
-    obrazovka = pygame.display.set_mode((sirka, vyska))
+class HraciPlochaGui:
+    def __init__(self, pocet_hracu, data_fronta):
+        self.pocet_hracu = pocet_hracu
+        self.data_fronta = data_fronta
+        # inicializace
+        pygame.init()
+        print("Ahoj")
 
-stred = sirka // 2
-fps = 60
-clock = pygame.time.Clock()
+        # Nastavení režimu a vytvoření okna
+        fullscreen = True  # Nastavte na True pro fullscreen
+        if fullscreen:
+            self.obrazovka = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            self.sirka, self.vyska = pygame.display.get_surface().get_size()
+        else:
+            # vytvoreni obrazovky
+            self.sirka = 1500
+            self.vyska = 1050
+            self.obrazovka = pygame.display.set_mode((self.sirka, self.vyska))
 
-# definice barev
-cerna = (0, 0, 0)
-seda = (50, 50, 50)
-bila = (255, 255, 255)
+        self.fps = 60
+        self.clock = pygame.time.Clock()
 
-# nastaveni fontu
-vedlejsi_font = pygame.font.SysFont("kokila", 40)
+        # definice barev
+        self.cerna = (0, 0, 0)
+        self.bila = (255, 255, 255)
 
-obrazovka.fill(bila)
+        # nastaveni fontu
+        self.vedlejsi_font = pygame.font.SysFont("kokila", 40)
 
-# pocet_hracu = int(input())
-pocet_hracu = 3
-vyska = vyska - 40
+        self.obrazovka.fill(self.bila)
+        self.vyska = self.vyska - 40
+        self.velikost_karet = 150
 
-velikost_karet = 150
+        pomocna = 150
 
-pomocna = 150
+        while True:
+            pocet_karet_vejdou = self.vyska // pomocna
 
-while True:
-    pocet_karet_vejdou = vyska // pomocna
+            if pocet_karet_vejdou < pocet_hracu + 1:
+                self.velikost_karet = pomocna
+                break
 
-    if pocet_karet_vejdou < pocet_hracu + 1:
-        velikost_karet = pomocna
-        break
+            pomocna += 5
+            if pomocna == 250:
+                self.velikost_karet = pomocna
+                break
+            print(pomocna)
 
-    pomocna += 5
-    if pomocna == 250:
-        velikost_karet = pomocna
-        break
-    print(pomocna)
+        print("velikost karet" + str(self.velikost_karet))
+        self.start()
 
-print("velikost karet" + str(velikost_karet))
+    def zpracuj_data(self, data):
+        print("data" + str(data))
 
-cilova_karta = pygame.image.load("zdroje/obrazky/cilova_karta.png").convert()
-karta_vlivu = pygame.image.load("zdroje/obrazky/karta_vlivu_zakryta.png").convert()
+    def nacitani_karet(self):
+        cilova_karta = pygame.image.load("zdroje/obrazky/karty/cilova_karta_serm_1.png").convert()
+        karta_vlivu = pygame.image.load("zdroje/obrazky/karty/zadni_strana_hrac5.png").convert()
 
-cilova_karta = pygame.transform.scale(cilova_karta, (velikost_karet, 0.75*velikost_karet))
-cilova_karta_rect = cilova_karta.get_rect()
+        cilova_karta = pygame.transform.scale(cilova_karta, (self.velikost_karet, (self.velikost_karet - 150)))
+        cilova_karta_rect = cilova_karta.get_rect()
 
-karta_vlivu = pygame.transform.scale(karta_vlivu, (velikost_karet, velikost_karet))
-karta_vlivu_rect = karta_vlivu.get_rect()
+        karta_vlivu = pygame.transform.scale(karta_vlivu, (self.velikost_karet, self.velikost_karet))
+        karta_vlivu_rect = karta_vlivu.get_rect()
 
-konec = False
-# hlavni herni cyklus
-while not konec:
+    def start(self):
+        konec = False
+        # hlavni herni cyklus
+        while not konec:
+            text = self.vedlejsi_font.render('Ahoj hraci', True, self.cerna)
+            text_rect = text.get_rect()
+            text_rect.center = (100, 200)
+            self.obrazovka.blit(text, text_rect)
 
-    sirka_dil = sirka // pocet_hracu  # 1200 // 5 = 240
-    sirka_pomocna = sirka_dil // 2 + 400  # 240 // 2 = 120
+            while not self.data_fronta.empty():
+                self.zpracuj_data(self.data_fronta.get())
 
-    for _ in range(pocet_hracu):
-        sirka_pomocna = sirka_pomocna + velikost_karet+40
-        cilova_karta_rect.center = (sirka_pomocna, velikost_karet/2+10)
-        obrazovka.blit(cilova_karta, cilova_karta_rect)
+            # obrazovka.blit(sipka, (stred-155, 10))
+            # pygame.draw.rect(obrazovka, ramec_barva, ramec, ramec_tloustka)
 
-    for x in range(pocet_hracu):
-        sirka_dil = sirka // pocet_hracu  # 1200 // 5 = 240
-        sirka_pomocna = sirka_dil // 2 + 400  # 240 // 2 = 120
-        zaklad = velikost_karet + velikost_karet/2 + 5
-        for _ in range(pocet_hracu):
-            # stary zpusob : sirka_pomocna = sirka_pomocna + sirka_dil
-            sirka_pomocna = sirka_pomocna + velikost_karet + 40
-            karta_vlivu_rect.center = (sirka_pomocna, zaklad + (velikost_karet * x))
-            obrazovka.blit(karta_vlivu, karta_vlivu_rect)
+            # obnova obrazovky
+            pygame.display.update()
+            self.clock.tick(self.fps)
 
-    # obrazovka.blit(sipka, (stred-155, 10))
-    # pygame.draw.rect(obrazovka, ramec_barva, ramec, ramec_tloustka)
-
-    # obnova obrazovky
-    pygame.display.update()
-    clock.tick(fps)
 
 # konec
 pygame.quit()

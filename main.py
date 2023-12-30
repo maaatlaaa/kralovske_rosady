@@ -3,6 +3,9 @@ Modul main.py představuje zakladní řídící jednotku pro naši hru.
 """
 
 import random
+import threading
+from queue import Queue
+from hraci_plocha_gui import HraciPlochaGui
 
 
 class Hrac:
@@ -106,7 +109,6 @@ class Hrac:
     def pridej_cilovou_kartu(self, nova_cilova_karta):
         """pridava hraci vyhranou cilovou kartu"""
         self.cilove_karty.append(nova_cilova_karta)
-
 
 class HraciPlocha:
     """ HraciPlocha reprezentuje hraci plochu,
@@ -493,6 +495,7 @@ class HraciPlocha:
             print("\n" + "-" * 8 * self.pocet_hracu)
 
         print("\n\n")
+        return self.hraci_plocha
 
 
 class Hra:
@@ -503,6 +506,11 @@ class Hra:
             self.hraci.append(Hrac(hrac))
         self.pocet_hracu = len(hraci)
         self.hraci_plocha = HraciPlocha(self.hraci)
+        self.data_fronta = Queue()
+        self.hraci_plocha_gui_thread = threading.Thread(target=HraciPlochaGui, args=(self.pocet_hracu, self.data_fronta))
+        self.hraci_plocha_gui_thread.start()
+
+        print("ahoj111")
         self.start_hry()
 
     def start_hry(self):
@@ -559,8 +567,12 @@ class Hra:
 
         while not self.hraci_plocha.plna():
             for hrac_x in self.hraci:
+                """tady budeme posilat to, co ma byt na hraci plose"""
+                self.data_fronta.put({"aktualni_hrac": str(hrac_x.jmeno)})
+                self.data_fronta.put({"hlavicka_hraci_plochy": self.hraci_plocha.hlavicka_hraci_plochy})
+                self.data_fronta.put({"hraci_plocha": self.hraci_plocha.hraci_plocha})
                 self.hraci_plocha.vypis()
-                print("hraje " + hrac_x.jmeno)
+                print("hraje " + str(hrac_x.jmeno))
                 print(hrac_x.karty_v_ruce())
                 volba_sloupce = int(input("Kam chcete kartu vyložit?"))
                 volba_karty = int(input("Jakou kartu chcete vyložit?"))
@@ -639,3 +651,6 @@ class Hra:
         if serazeni_hraci[0].body == serazeni_hraci[1].body:
             return self.hraci_plocha.kdo_driv(sloupec, serazeni_hraci, 0)
         return serazeni_hraci[0]
+
+
+hra = Hra(["Matous", "Sarinka", "Natka"])
