@@ -3,15 +3,17 @@ Modul main.py představuje zakladní řídící jednotku pro naši hru.
 """
 
 import random
+import threading
+from queue import Queue
+from hraci_plocha_gui import HraciPlochaGui
 
 
 class Hrac:
     """
     class Hrac je reprezentujici objekt hrajiciho hrace
     """
-    def __init__(self, jmeno, vek):
+    def __init__(self, jmeno):
         self.jmeno = jmeno
-        self.vek = vek
         self.balicek = self.vytvoreni_balicku()
         self.body = 0
         self.cilove_karty = []
@@ -107,7 +109,6 @@ class Hrac:
     def pridej_cilovou_kartu(self, nova_cilova_karta):
         """pridava hraci vyhranou cilovou kartu"""
         self.cilove_karty.append(nova_cilova_karta)
-
 
 class HraciPlocha:
     """ HraciPlocha reprezentuje hraci plochu,
@@ -494,25 +495,30 @@ class HraciPlocha:
             print("\n" + "-" * 8 * self.pocet_hracu)
 
         print("\n\n")
+        return self.hraci_plocha
 
 
 class Hra:
     """tato trida odkazuje na objekt ridici celou hru"""
     def __init__(self, hraci):
-        self.hraci = hraci
-        pocet_hracu = len(hraci)
-        if pocet_hracu not in range(2, 7):
-            raise ValueError("Neplatný počet hráčů. Povolený rozsah je 2 až 6 hráčů.")
-        self.pocet_hracu = pocet_hracu
-
+        self.hraci = []
+        for hrac in hraci:
+            self.hraci.append(Hrac(hrac))
+        self.pocet_hracu = len(hraci)
         self.hraci_plocha = HraciPlocha(self.hraci)
+        self.data_fronta = Queue()
+        self.hraci_plocha_gui_thread = threading.Thread(target=HraciPlochaGui, args=(self.pocet_hracu, self.data_fronta))
+        self.hraci_plocha_gui_thread.start()
+
+        print("ahoj111")
+        self.start_hry()
 
     def start_hry(self):
         """
         start hry je hlavni ridici smycka pro hru
         """
         for _ in range(6):
-            hra.kolo()
+            self.kolo()
         self.zaverecne_vyhodnoceni()
 
     def zaverecne_vyhodnoceni(self):
@@ -561,8 +567,12 @@ class Hra:
 
         while not self.hraci_plocha.plna():
             for hrac_x in self.hraci:
+                """tady budeme posilat to, co ma byt na hraci plose"""
+                self.data_fronta.put({"aktualni_hrac": str(hrac_x.jmeno)})
+                self.data_fronta.put({"hlavicka_hraci_plochy": self.hraci_plocha.hlavicka_hraci_plochy})
+                self.data_fronta.put({"hraci_plocha": self.hraci_plocha.hraci_plocha})
                 self.hraci_plocha.vypis()
-                print("hraje " + hrac_x.jmeno)
+                print("hraje " + str(hrac_x.jmeno))
                 print(hrac_x.karty_v_ruce())
                 volba_sloupce = int(input("Kam chcete kartu vyložit?"))
                 volba_karty = int(input("Jakou kartu chcete vyložit?"))
@@ -643,10 +653,4 @@ class Hra:
         return serazeni_hraci[0]
 
 
-hrac1 = Hrac("Matous", 21)
-hrac2 = Hrac("Sarinka", 20)
-hrac3 = Hrac("Natka", 11)
-hrajici_hraci = [hrac1, hrac2, hrac3]
-
-hra = Hra(hrajici_hraci)
-hra.start_hry()
+hra = Hra(["Matous", "Sarinka", "Natka"])
