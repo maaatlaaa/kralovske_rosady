@@ -1,0 +1,9 @@
+services:
+  rosady:
+    build: .
+    container_name: kralovske-rosady
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data

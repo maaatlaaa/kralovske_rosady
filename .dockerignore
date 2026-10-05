@@ -1,0 +1,8 @@
+.git
+data
+puvodni_pygame
+tests
+zdroje/obrazky/karty_podklady
+zdroje/obrazky/main_cz*
+**/__pycache__
+.pytest_cache

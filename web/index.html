@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#3b2414">
+  <title>Královské rošády</title>
+  <link rel="icon" href="/obrazky/karty/kral_cervena.webp">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="odpojeno" class="banner" hidden>Spojení se serverem přerušeno – připojuji znovu…</div>
+
+  <main id="aplikace">
+    <!-- uvodni obrazovka -->
+    <section id="domu" class="obrazovka" hidden>
+      <h1 class="nadpis">Královské rošády</h1>
+      <div class="panel uvod">
+        <label class="pole-formulare">Tvoje jméno
+          <input id="jmeno" maxlength="20" autocomplete="nickname" placeholder="např. Matouš">
+        </label>
+        <button id="zalozit" class="tlacitko hlavni">Založit novou hru</button>
+        <div class="oddelovac">nebo</div>
+        <div class="radek-formulare">
+          <input id="kod" maxlength="4" placeholder="KÓD" autocapitalize="characters" autocomplete="off">
+          <button id="pripojit" class="tlacitko">Připojit se</button>
+        </div>
+        <p id="chyba-domu" class="chyba" hidden></p>
+      </div>
+      <div id="moje-hry" class="panel" hidden>
+        <h2>Moje hry</h2>
+        <ul id="seznam-her" class="seznam"></ul>
+      </div>
+      <div class="radek-tlacitek">
+        <button class="tlacitko vedlejsi" data-otevri="pravidla">Pravidla a karty</button>
+        <button class="tlacitko vedlejsi" id="otevri-sal">Sál slávy</button>
+      </div>
+    </section>
+
+    <!-- lobby pred zacatkem hry -->
+    <section id="lobby" class="obrazovka" hidden>
+      <h1 class="nadpis">Královské rošády</h1>
+      <div class="panel">
+        <p>Kód hry</p>
+        <div class="kod-hry" id="lobby-kod"></div>
+        <button id="kopirovat" class="tlacitko vedlejsi">Zkopírovat odkaz pro ostatní</button>
+        <h2>Hráči</h2>
+        <ul id="lobby-hraci" class="seznam hraci"></ul>
+        <p id="lobby-info" class="napoveda"></p>
+        <div class="radek-tlacitek">
+          <button id="spustit" class="tlacitko hlavni">Spustit hru</button>
+          <button id="opustit" class="tlacitko vedlejsi">Opustit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- samotna hra -->
+    <section id="hra" class="obrazovka" hidden>
+      <header class="horni-lista">
+        <a href="#" class="domu-odkaz" title="Zpět na úvod">♔</a>
+        <div class="kolo" id="kolo"></div>
+        <div class="stav-tahu" id="stav-tahu"></div>
+      </header>
+      <div class="rozlozeni">
+        <div class="hlavni-sloupec">
+          <div id="konec" class="panel" hidden></div>
+          <div id="plocha" class="plocha"></div>
+          <div id="rozhodnuti" class="panel rozhodnuti" hidden></div>
+          <div id="ruka-obal" class="ruka-obal">
+            <div id="ruka" class="ruka"></div>
+            <p id="popis-karty" class="popis-karty"></p>
+          </div>
+          <div id="vysledky" class="vysledky" hidden></div>
+        </div>
+        <aside class="bocni-sloupec">
+          <div class="panel">
+            <h2>Hráči</h2>
+            <ul id="hraci" class="seznam hraci"></ul>
+          </div>
+          <details class="panel" id="zaznamy-obal" open>
+            <summary>Průběh hry</summary>
+            <ol id="zaznamy" class="zaznamy"></ol>
+          </details>
+          <button class="tlacitko vedlejsi" data-otevri="pravidla">Pravidla a karty</button>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <!-- dialogy -->
+  <dialog id="pravidla" class="dialog">
+    <form method="dialog"><button class="zavrit" aria-label="Zavřít">✕</button></form>
+    <h2>Pravidla</h2>
+    <ul class="pravidla-text">
+      <li>Každý hráč má vlastní balíček 25 karet vlivu a v ruce vždy 3 karty.</li>
+      <li>Hraje se 6 kol. V každém kole leží nad plochou tolik cílových karet, kolik je hráčů – každá patří jednomu sloupci.</li>
+      <li>Hráči se střídají a vykládají karty <b>lícem dolů</b> na první volné místo vybraného sloupce.</li>
+      <li>Když pod zakrytou kartu někdo vyloží další kartu, horní karta se <b>otočí</b> a případně provede svou akci (Objevitel, Mordýř, Bouře, Převlek, Zrádce).</li>
+      <li>Když je plocha plná, všechny karty se odkryjí a každý sloupec se vyhodnotí: vyhrává hráč s nejvyšším součtem svých karet ve sloupci a získá cílovou kartu. Při remíze vyhrává ten, jehož karta leží výš.</li>
+      <li>Na konci se sečtou body cílových karet. Kdo má všech 6 kategorií, může si nejvyšší kartu každé kategorie započítat dvakrát a za každou další kartu odečíst 1 bod.</li>
+    </ul>
+    <h2>Karty</h2>
+    <div id="seznam-karet" class="seznam-karet"></div>
+  </dialog>
+
+  <dialog id="sal" class="dialog">
+    <form method="dialog"><button class="zavrit" aria-label="Zavřít">✕</button></form>
+    <h2>Sál slávy</h2>
+    <div id="sal-obsah"></div>
+  </dialog>
+
+  <dialog id="detail" class="dialog maly">
+    <form method="dialog"><button class="zavrit" aria-label="Zavřít">✕</button></form>
+    <div id="detail-obsah"></div>
+  </dialog>
+
+  <div id="hlaska" class="hlaska" hidden></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
