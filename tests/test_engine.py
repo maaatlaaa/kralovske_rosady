@@ -117,15 +117,47 @@ def test_poradi_pokracuje_do_dalsiho_kola():
     assert hra.na_tahu == 0
 
 
-def test_dobirani_po_dojiti_balicku():
+def test_dobirani_z_odhazovaciho_balicku():
     hra = nova_hra(2)
     hrac = hra.hraci[0]
     hrac["balicek"] = []
     hrac["ruka"] = ["Král", "Mág"]
+    hrac["odhozene"] = ["Drak", "Romeo"]
     hra._dober(hrac)
     assert len(hrac["ruka"]) == 3
-    assert len(set(hrac["ruka"])) == 3
-    assert len(hrac["balicek"]) == 25 - 3
+    assert hrac["ruka"][-1] in ("Drak", "Romeo")
+    assert len(hrac["balicek"]) == 1 and hrac["odhozene"] == []
+
+
+def test_bez_karet_se_nedobira():
+    hra = nova_hra(2)
+    hrac = hra.hraci[0]
+    hrac["balicek"], hrac["odhozene"], hrac["ruka"] = [], [], ["Král"]
+    hra._dober(hrac)
+    assert hrac["ruka"] == ["Král"]
+
+
+def test_vylozene_karty_jdou_na_konci_kola_na_odhazovaci_balicek():
+    hra = nova_hra(2)
+    nastav_cile(hra, 1, 1)
+    dej_do_ruky(hra, 0, "Převlek", "Žebrák", "Žebrák")
+    hra.vyloz(0, 0, 0)
+    hra.sloupce[0][0]["pod_prevlekem"] = "Král"
+    dej_do_ruky(hra, 1, "Drak", "Žebrák", "Žebrák")
+    hra.vyloz(1, 0, 1)
+    assert hra.faze == VYHODNOCENI
+    hra.pokracovat(0, za_vsechny=True)
+    assert sorted(hra.hraci[0]["odhozene"]) == ["Král", "Převlek"]
+    assert hra.hraci[1]["odhozene"] == ["Drak"]
+
+
+def test_hrac_bez_karet_se_preskakuje():
+    hra = nova_hra(3)
+    nastav_cile(hra, 5, 5, 5)
+    hra.hraci[1]["ruka"] = []
+    dej_do_ruky(hra, 0, "Král", "Žebrák", "Žebrák")
+    hra.vyloz(0, 0, 0)
+    assert hra.na_tahu == 2
 
 
 def test_cela_hra_dobehne():
@@ -336,6 +368,19 @@ def test_mag_a_carodejnice_pusobi_oba():
     assert vyhodnot(hra, 0)["soucty"] == {0: 9.5, 2: 1}
 
 
+def test_dva_magove_se_zrusi():
+    hra = nova_hra(3)
+    nastav_sloupec(hra, 0, [("Král", 0), ("Mág", 1), ("Mág", 2)])
+    assert vyhodnot(hra, 0)["soucty"] == {0: 20, 1: 7, 2: 7}
+
+
+def test_dve_carodejnice_se_zrusi():
+    hra = nova_hra(3)
+    nastav_sloupec(hra, 0, [("Bouře", 0), ("Čarodějnice", 1),
+                            ("Čarodějnice", 2)])
+    assert vyhodnot(hra, 0)["soucty"] == {0: 9, 1: 1, 2: 1}
+
+
 def test_musketyri_ruseji_schopnosti():
     hra = nova_hra(3)
     nastav_sloupec(hra, 0, [("Král", 0), ("Mág", 1), ("Mušketýři", 2),
@@ -385,6 +430,13 @@ def test_drak_ubira_soupearum():
     assert vyhodnot(hra, 0)["soucty"] == {0: 11, 1: 25}
 
 
+def test_drak_nesnizi_hodnotu_pod_nulu():
+    hra = nova_hra(3)
+    nastav_sloupec(hra, 0, [("Drak", 0), ("Čarodějnice", 1), ("Převlek", 2)])
+    # Carodejnice odstrani Prevlek (0); jeji 1 klesne jen na 0
+    assert vyhodnot(hra, 0)["soucty"] == {0: 11, 1: 0}
+
+
 def test_palecek_a_poustevnik_pocitaji_vsechny_ostatni_karty():
     hra = nova_hra(3)
     nastav_sloupec(hra, 0, [("Panoš", 2), ("Paleček", 0), ("Poustevník", 1)])
@@ -405,10 +457,19 @@ def test_dvojnik_kopiruje_kartu_tesne_pod_sebou():
     assert vysledek["vitez"] == 0
 
 
-def test_dvojnik_na_konci_ma_nulu():
+def test_dvojnik_bez_karty_pod_sebou_nema_hodnotu():
     hra = nova_hra(3)
-    nastav_sloupec(hra, 0, [("Drak", 0), ("Panoš", 1), ("Dvojník", 2)])
-    assert vyhodnot(hra, 0)["soucty"] == {0: 11, 1: 0, 2: -2}
+    nastav_sloupec(hra, 0, [("Žebrák", 0), ("Král", 1), ("Dvojník", 2)])
+    vysledek = vyhodnot(hra, 0)
+    # hrac jen s Dvojnikem bez hodnoty nemuze vyhrat ani se Zebrakem
+    assert vysledek["soucty"] == {0: 4, 1: 20}
+    assert vysledek["vitez"] == 0
+
+
+def test_prazdny_prevlek_se_zebrakem_vyhrava():
+    hra = nova_hra(3)
+    nastav_sloupec(hra, 0, [("Žebrák", 0), ("Převlek", 1)])
+    assert vyhodnot(hra, 0)["vitez"] == 1
 
 
 def test_prevlek_se_promeni():

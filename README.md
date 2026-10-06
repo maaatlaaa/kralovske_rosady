@@ -96,10 +96,13 @@ Pravidla jsou naprogramovaná podle originálu (zdroj: [recenze a pravidla na Ge
 - Na konci kola se všechny karty odkryjí bez okamžitých akcí. Pak platí v tomto pořadí:
   **Mušketýři** (zruší všechny schopnosti ve sloupci), **Mág** (odstraní karty s hodnotou 10+),
   **Čarodějnice** (odstraní karty s hodnotou 9 a méně kromě sebe), **Princ + Panoš** (automatická výhra).
+- Dva **Mágové** (nebo dvě **Čarodějnice**) ve stejném sloupci se navzájem zruší.
 - **Poustevník** −1 a **Paleček** +3 za každou další kartu ve sloupci, **Dvojník** převezme hodnotu karty
-  těsně pod sebou, **Romeo** s Julií má 15, **Drak** ubere 2 body každé kartě soupeřů.
+  těsně pod sebou (bez ní nemá žádnou hodnotu), **Romeo** s Julií má 15, **Drak** ubere 2 body každé
+  kartě soupeřů (ne pod 0).
 - Remízu vyhrává hráč, jehož karta leží nejblíž cílové kartě; se **Žebrákem** (vyhrává nejnižší součet)
-  naopak ten, jehož karta leží nejdál.
+  naopak ten, jehož karta leží nejdál. Hráč, který má ve sloupci jen Dvojníka bez hodnoty, vyhrát nemůže.
+- Vyložené karty jdou na konci kola na odhazovací balíček, který se zamíchá, až dojde dobírací.
 - Pořadí hráčů plynule pokračuje i přes konec kola.
 
 Co originální pravidla neříkají jednoznačně (snadno se upraví v `rosady/engine.py`):
@@ -110,4 +113,5 @@ Co originální pravidla neříkají jednoznačně (snadno se upraví v `rosady/
 - Mušketýři ruší i bonus specialistů (Alchymista, Šermíř, … mají jen 8).
 - Objevitel přeskakuje sloupce uzavřené Bouří a během jednoho tahu může cestovat jen jednou
   (jinak by se několik Objevitelů mohlo posílat dokola donekonečna).
+- Tři Mágové ve sloupci: dva se zruší a třetí platí (stejně Čarodějnice).
 - První kolo začíná zakladatel hry.

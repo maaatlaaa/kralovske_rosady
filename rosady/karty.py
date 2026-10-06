@@ -81,11 +81,11 @@ KARTY = {
                            "specialistů) – počítají se jen základní hodnoty."},
     "Mág": {"soubor": "mag", "hodnota": 7,
             "popis": "Při vyhodnocení odstraní ze sloupce všechny karty "
-                     "s hodnotou 10 a více."},
+                     "s hodnotou 10 a více. Dva Mágové se navzájem zruší."},
     "Čarodějnice": {"soubor": "carodejnice", "hodnota": 1,
                     "popis": "Při vyhodnocení (až po Mágovi) odstraní ze sloupce "
                              "všechny karty s hodnotou 9 a méně, kromě "
-                             "Čarodějnic."},
+                             "Čarodějnic. Dvě Čarodějnice se navzájem zruší."},
     "Princ": {"soubor": "princ", "hodnota": 14,
               "popis": "Máš-li ve stejném sloupci Prince i Panoše, "
                        "vyhráváš sloupec automaticky."},
@@ -98,9 +98,11 @@ KARTY = {
                 "popis": "Za každou další kartu ve sloupci získává 3 body."},
     "Dvojník": {"soubor": "dvojnik", "hodnota": 0,
                 "popis": "Při vyhodnocení převezme hodnotu karty těsně pod "
-                         "sebou (ne její schopnost). Bez karty pod sebou má 0."},
+                         "sebou (ne její schopnost). Bez karty pod sebou "
+                         "nemá žádnou hodnotu."},
     "Drak": {"soubor": "drak", "hodnota": 11,
-             "popis": "Všem kartám soupeřů ve sloupci ubere 2 body."},
+             "popis": "Všem kartám soupeřů ve sloupci ubere 2 body "
+                      "(hodnota karty ale neklesne pod 0)."},
     "Romeo": {"soubor": "romeo", "hodnota": 5,
               "popis": "Máš-li ve stejném sloupci i Julii, má Romeo "
                        "hodnotu 15."},

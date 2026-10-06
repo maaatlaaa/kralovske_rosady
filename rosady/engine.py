@@ -42,7 +42,7 @@ class Hra:
         self.hraci = []
         for jmeno in jmena:
             hrac = {"jmeno": jmeno, "balicek": novy_balicek(self.rng),
-                    "ruka": [], "cilove_karty": []}
+                    "ruka": [], "odhozene": [], "cilove_karty": []}
             self.hraci.append(hrac)
             self._dober(hrac)
         self.pocet = len(jmena)
@@ -134,6 +134,10 @@ class Hra:
     # --------------------------------------------------------- prubeh kola
 
     def _zacni_kolo(self):
+        # karty vylozene v minulem kole jdou vlastnikum na odhazovaci balicek
+        for sloupec in self.sloupce:
+            for karta in sloupec:
+                self._odhod(karta)
         self.hlavicka = [self.cilove_balicek.pop() for _ in range(self.pocet)]
         self.sloupce = [[] for _ in range(self.pocet)]
         self.uzavrene = [False] * self.pocet
@@ -155,21 +159,38 @@ class Hra:
     def _dalsi_tah(self):
         if all(self.splneny(s) for s in range(self.pocet)):
             self._vyhodnot_kolo()
-        else:
-            self.na_tahu = (self.na_tahu + 1) % self.pocet
-            self.faze = TAH
+            return
+        # hrac bez karet (vzacne - dosly mu vsechny karty) se preskakuje
+        for posun in range(1, self.pocet + 1):
+            dalsi = (self.na_tahu + posun) % self.pocet
+            if self.hraci[dalsi]["ruka"]:
+                self.na_tahu = dalsi
+                self.faze = TAH
+                return
+        self._zaznam("Nikdo už nemá karty, kolo končí.")
+        self._vyhodnot_kolo()
 
     def _dokonci_volbu(self):
         self.volba = None
         self._dalsi_tah()
 
     def _dober(self, hrac):
-        """doplni ruku; dojde-li balicek, zamicha se novy bez karet v ruce"""
+        """doplni ruku; dojde-li balicek, zamicha se odhazovaci balicek"""
         while len(hrac["ruka"]) < VELIKOST_RUKY:
             if not hrac["balicek"]:
-                hrac["balicek"] = [karta for karta in novy_balicek(self.rng)
-                                   if karta not in hrac["ruka"]]
+                if not hrac["odhozene"]:
+                    return
+                hrac["balicek"] = hrac["odhozene"]
+                hrac["odhozene"] = []
+                self.rng.shuffle(hrac["balicek"])
             hrac["ruka"].append(hrac["balicek"].pop())
+
+    def _odhod(self, karta):
+        """karta ze stolu jde vlastnikovi na odhazovaci balicek"""
+        odhozene = self.hraci[karta["hrac"]]["odhozene"]
+        odhozene.append(karta["karta"])
+        if karta["pod_prevlekem"]:
+            odhozene.append(karta["pod_prevlekem"])
 
     # ------------------------------------------------------- otaceni karet
 
@@ -195,6 +216,7 @@ class Hra:
                 self._objevitel(sloupec, index)
         elif nazev == "Mordýř":
             obet = self.sloupce[sloupec].pop(index + 1)
+            self._odhod(obet)
             self._zaznam(f"Mordýř zabil kartu hráče "
                          f"{self._jmeno(obet['hrac'])}.")
         elif nazev == "Bouře":
@@ -270,11 +292,12 @@ class Hra:
                 hodnota += 10
             karta["hodnota"] = hodnota
         # Dvojnik prebira hodnotu karty tesne pod sebou (odspodu nahoru,
-        # aby fungovalo i vic Dvojniku pod sebou)
+        # aby fungovalo i vic Dvojniku pod sebou); bez karty pod sebou
+        # nema zadnou hodnotu (None)
         for i in range(len(aktivni) - 1, -1, -1):
             if aktivni[i]["nazev"] == "Dvojník":
                 aktivni[i]["hodnota"] = (aktivni[i + 1]["hodnota"]
-                                         if i + 1 < len(aktivni) else 0)
+                                         if i + 1 < len(aktivni) else None)
 
     def _vyhodnot_sloupec(self, sloupec):
         """spocita sloupec a vrati podrobny vysledek pro zobrazeni"""
@@ -284,14 +307,18 @@ class Hra:
             nazev = karta["pod_prevlekem"] or karta["karta"]
             karty.append({"index": index, "hrac": karta["hrac"], "nazev": nazev,
                           "prevlek": karta["pod_prevlekem"] is not None,
-                          "hodnota": KARTY[nazev]["hodnota"],
+                          "hodnota": (None if nazev == "Dvojník"
+                                      else KARTY[nazev]["hodnota"]),
                           "odstranena": False})
         poznamky = []
         vysledek = {"sloupec": sloupec, "karty": karty, "poznamky": poznamky,
                     "soucty": {}, "vitez": None, "nejnizsi_vyhrava": False}
 
         def je(nazev):
-            return any(k["nazev"] == nazev and not k["odstranena"]
+            return pocet(nazev) > 0
+
+        def pocet(nazev):
+            return sum(k["nazev"] == nazev and not k["odstranena"]
                        for k in karty)
 
         if je("Mušketýři"):
@@ -299,17 +326,25 @@ class Hra:
                             "se jen základní hodnoty.")
         else:
             self._spocitej_hodnoty(karty, kategorie)
-            if je("Mág"):
+            # dva Magove (dve Carodejnice) se navzajem zrusi
+            magu = pocet("Mág")
+            if magu % 2:
                 poznamky.append("Mág odstranil karty s hodnotou 10 a více.")
                 for karta in karty:
-                    if karta["hodnota"] >= 10:
+                    if karta["hodnota"] is not None and karta["hodnota"] >= 10:
                         karta["odstranena"] = True
-            if je("Čarodějnice"):
+            elif magu:
+                poznamky.append("Mágové se navzájem zrušili.")
+            carodejnic = pocet("Čarodějnice")
+            if carodejnic % 2:
                 poznamky.append("Čarodějnice odstranila karty s hodnotou "
                                 "9 a méně.")
                 for karta in karty:
-                    if karta["hodnota"] <= 9 and karta["nazev"] != "Čarodějnice":
+                    if (karta["hodnota"] is not None and karta["hodnota"] <= 9
+                            and karta["nazev"] != "Čarodějnice"):
                         karta["odstranena"] = True
+            elif carodejnic:
+                poznamky.append("Čarodějnice se navzájem zrušily.")
             self._spocitej_hodnoty(karty, kategorie)
 
             aktivni = [k for k in karty if not k["odstranena"]]
@@ -324,13 +359,18 @@ class Hra:
                 poznamky.append(f"Drak ({self._jmeno(drak['hrac'])}) ubral "
                                 f"soupeřům 2 body z každé karty.")
                 for karta in aktivni:
-                    if karta["hrac"] != drak["hrac"]:
-                        karta["hodnota"] -= 2
+                    hodnota = karta["hodnota"]
+                    if (karta["hrac"] != drak["hrac"] and hodnota is not None
+                            and hodnota > 0):
+                        # hodnota karty neklesne pod nulu
+                        karta["hodnota"] = max(0, hodnota - 2)
             if je("Žebrák"):
                 poznamky.append("Žebrák: vyhrává nejnižší součet.")
                 vysledek["nejnizsi_vyhrava"] = True
 
-        aktivni = [k for k in karty if not k["odstranena"]]
+        # Dvojnik bez hodnoty se nepocita - hrac jen s nim sloupec nevyhraje
+        aktivni = [k for k in karty
+                   if not k["odstranena"] and k["hodnota"] is not None]
         soucty = {}
         for karta in aktivni:
             soucty[karta["hrac"]] = soucty.get(karta["hrac"], 0) + karta["hodnota"]
@@ -474,6 +514,8 @@ class Hra:
         hra.rng = rng or random.Random()
         for klic in cls._UKLADANE:
             setattr(hra, klic, data[klic])
+        for hrac in hra.hraci:
+            hrac.setdefault("odhozene", [])
         # JSON nezna celociselne klice slovniku
         for vysledek in hra.vysledky_kola:
             vysledek["soucty"] = {int(k): v

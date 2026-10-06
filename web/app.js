@@ -72,7 +72,7 @@ const obrazekCilove = (karta) =>
 const barvaHrace = (hrac) => katalog.barvy[hrac].hex;
 
 function hodnotaText(hodnota) {
-  return String(hodnota).replace(".", ",");
+  return hodnota === null ? "–" : String(hodnota).replace(".", ",");
 }
 
 // ------------------------------------------------------- stav aplikace
