@@ -60,19 +60,79 @@ async function api(cesta, telo) {
   return data;
 }
 
-// ---------------------------------------------------------- obrazky
+// ------------------------------------------------------------ karty
 
 let katalog = null;
+let specialiste = {};   // nazev karty -> kategorie, ve ktere ma bonus
 
-const obrazekKarty = (nazev, hrac) =>
-  `/obrazky/karty/${katalog.karty[nazev].soubor}_${katalog.barvy[hrac].nazev}.webp`;
-const obrazekRubu = (hrac) => `/obrazky/karty/zadni_strana_hrac${hrac}.webp`;
-const obrazekCilove = (karta) =>
-  `/obrazky/karty/cilova_karta_${katalog.kategorie[karta.kategorie].soubor}_${karta.hodnota}.webp`;
 const barvaHrace = (hrac) => katalog.barvy[hrac].hex;
 
 function hodnotaText(hodnota) {
   return hodnota === null ? "–" : String(hodnota).replace(".", ",");
+}
+
+function hodnotaNaKarte(nazev) {
+  if (nazev === "Dvojník") return "?";
+  const hodnota = katalog.karty[nazev].hodnota;
+  return hodnota === 9.5 ? "9½" : String(hodnota);
+}
+
+const KORUNA = '<svg viewBox="0 0 64 64" aria-hidden="true"><path fill="#e2b85a" stroke="#2c1c0c" ' +
+  'stroke-width="2.5" stroke-linejoin="round" d="M8 46 4 18l15 12 13-20 13 20 15-12-4 28z"/>' +
+  '<rect x="8" y="48" width="48" height="8" rx="2" fill="#e2b85a" stroke="#2c1c0c" stroke-width="2.5"/>' +
+  '<circle cx="32" cy="34" r="4" fill="#9a2015"/><circle cx="18" cy="38" r="3" fill="#23415e"/>' +
+  '<circle cx="46" cy="38" r="3" fill="#23415e"/></svg>';
+
+/** licova strana karty vlivu v barve hrace */
+function karta(nazev, hrac) {
+  const info = katalog.karty[nazev];
+  const kategorie = specialiste[nazev];
+  let stitek = null;
+  if (kategorie) {
+    stitek = h("div", { class: "k-kdy k-kdy-kat", style: `--kat:${katalog.kategorie[kategorie].barva}` }, kategorie);
+  } else if (info.kdy) {
+    stitek = h("div", { class: `k-kdy k-kdy-${info.kdy}` },
+      info.kdy === "otoceni" ? "Po otočení" : "Na konci kola");
+  }
+  return h("div", { class: "k", style: `--hrac:${barvaHrace(hrac)}` },
+    h("div", { class: "k-ram" },
+      h("div", { class: "k-obraz" },
+        h("img", { src: `/obrazky/ilustrace/${info.soubor}.webp`, alt: "", loading: "lazy", draggable: "false" })),
+      h("div", { class: "k-text" }, stitek,
+        h("p", { class: info.kdy ? null : "k-citat" }, info.kratky))),
+    h("div", { class: "k-nazev" + (nazev.length > 9 ? " dlouhy" : "") }, nazev),
+    h("div", {
+      class: "medailon k-hodnota" + (hodnotaNaKarte(nazev).includes("½") ? " male" : ""),
+      title: `hodnota ${hodnotaText(info.hodnota)}`,
+    }, hodnotaNaKarte(nazev)),
+    kategorie
+      ? h("div", {
+          class: "medailon k-bonus",
+          style: `--kat:${katalog.kategorie[kategorie].barva}`,
+          title: `ve sloupci ${kategorie} má hodnotu ${katalog.bonus_specialisty}`,
+        }, h("img", { src: `/obrazky/znaky/${info.soubor}.webp`, alt: "" }),
+           h("span", null, katalog.bonus_specialisty))
+      : null);
+}
+
+/** rub karty - kazdy hrac ma vlastni barvu */
+function rubKarty(hrac) {
+  const erb = h("div", { class: "k-erb" });
+  erb.innerHTML = KORUNA;
+  return h("div", { class: "k k-rub", style: `--hrac:${barvaHrace(hrac)}` },
+    h("div", { class: "k-ram" }, h("div", { class: "k-pole" }, erb)));
+}
+
+/** cilova karta (hodnota + kategorie) */
+function cilovaKarta(cilova) {
+  const kategorie = katalog.kategorie[cilova.kategorie];
+  const znak = katalog.karty[kategorie.specialista].soubor;
+  return h("div", { class: "c", style: `--kat:${kategorie.barva}`, title: `${cilova.kategorie} ${cilova.hodnota}` },
+    h("div", { class: "c-telo" },
+      h("div", { class: "c-hodnota" }, cilova.hodnota),
+      h("div", { class: "c-vpravo" },
+        h("img", { class: "c-znak", src: `/obrazky/znaky/${znak}.webp`, alt: "" }),
+        h("div", { class: "c-nazev" }, cilova.kategorie))));
 }
 
 // ------------------------------------------------------- stav aplikace
@@ -378,14 +438,12 @@ function vykresliPlochu(hra, mujTah, volimZradce) {
         (vyberZradce === s || vlastniZradce ? " vybrana" : ""),
       title: `${cilova.kategorie} ${cilova.hodnota}`,
       onclick: volitelna ? () => { vyberZradce = s; vykresli(); } : null,
-    }, h("img", { src: obrazekCilove(cilova), alt: `${cilova.kategorie} ${cilova.hodnota}` }),
-       konecKola && s in vitezove
-         ? h("span", { class: "vitez-stitek" },
-             vitezove[s] === null ? "nikdo" : `🏆 ${hra.hraci[vitezove[s]].jmeno}`)
-         : null);
+    }, cilovaKarta(cilova));
 
     let stav;
-    if (uzavreny) stav = "⛈ uzavřeno";
+    if (konecKola && s in vitezove) {
+      stav = vitezove[s] === null ? "nikdo nevyhrál" : `🏆 ${hra.hraci[vitezove[s]].jmeno}`;
+    } else if (uzavreny) stav = "⛈ uzavřeno";
     else if (karty.length >= cilova.hodnota) stav = `✓ ${karty.length}/${cilova.hodnota}`;
     else stav = `${karty.length}/${cilova.hodnota}`;
     const info = h("div", {
@@ -408,20 +466,13 @@ function vykresliPlochu(hra, mujTah, volimZradce) {
 }
 
 function vykresliPole(hra, pole, odstranena) {
-  const styl = `--barva-hrace:${barvaHrace(pole.hrac)}`;
   const vlastnik = hra.hraci[pole.hrac].jmeno;
   const tridy = ["pole", "karta"];
   if (odstranena) tridy.push("odstranena");
-  let obrazek;
   let odznak = null;
-  if (pole.odkryta) {
-    obrazek = obrazekKarty(pole.karta, pole.hrac);
-  } else if (pole.karta) {
-    obrazek = obrazekKarty(pole.karta, pole.hrac);
+  if (!pole.odkryta && pole.karta) {
     tridy.push("zakryta-moje");
     odznak = h("span", { class: "odznak" }, "zakrytá");
-  } else {
-    obrazek = obrazekRubu(pole.hrac);
   }
   let prevlek = null;
   if (pole.ma_prevlek) {
@@ -430,27 +481,25 @@ function vykresliPole(hra, pole, odstranena) {
   }
   return h("div", {
     class: tridy.join(" "),
-    style: styl,
     title: pole.karta ? `${pole.karta} (${vlastnik})` : `zakrytá karta (${vlastnik})`,
     onclick: (udalost) => {
       if (udalost.currentTarget.closest(".sloupec.lze")) return;
       ukazDetail(pole, vlastnik);
     },
-  }, h("img", { src: obrazek, alt: pole.karta || "zakrytá karta", loading: "lazy" }), odznak, prevlek);
+  }, pole.karta ? karta(pole.karta, pole.hrac) : rubKarty(pole.hrac), odznak, prevlek);
 }
 
 function ukazDetail(pole, vlastnik) {
   const obsah = $("#detail-obsah");
   if (!pole.karta) {
     obsah.replaceChildren(
-      h("img", { src: obrazekRubu(pole.hrac), alt: "" }),
+      h("div", { class: "detail-karta" }, rubKarty(pole.hrac)),
       h("p", null, `Zakrytá karta hráče ${vlastnik}.`));
   } else {
     const info = katalog.karty[pole.karta];
     obsah.replaceChildren(
-      h("img", { src: obrazekKarty(pole.karta, pole.hrac), alt: pole.karta }),
-      h("h2", null, pole.karta),
-      h("p", null, h("b", null, `Hodnota ${hodnotaText(info.hodnota)}. `), info.popis),
+      h("div", { class: "detail-karta" }, karta(pole.karta, pole.hrac)),
+      h("p", null, info.popis),
       h("p", { class: "napoveda" }, `Patří hráči ${vlastnik}.`),
       pole.pod_prevlekem ? h("p", null, `🎭 Pod Převlekem: ${pole.pod_prevlekem}`) : null);
   }
@@ -468,7 +517,7 @@ function kartaVRuce(hra, nazev, index, vybrana, onclick) {
     title: `${nazev} – ${katalog.karty[nazev].popis}`,
     onclick,
     disabled: onclick ? null : true,
-  }, h("img", { src: obrazekKarty(nazev, hra.ja), alt: nazev }));
+  }, karta(nazev, hra.ja));
 }
 
 function vykresliRuku(hra, mujTah) {
@@ -589,7 +638,7 @@ function vykresliHrace(hra) {
 function vykresliKatalog() {
   $("#seznam-karet").replaceChildren(...Object.entries(katalog.karty).map(([nazev, info]) =>
     h("div", { class: "karta-info" },
-      h("img", { src: obrazekKarty(nazev, 3), alt: nazev, loading: "lazy" }),
+      karta(nazev, 3),
       h("div", null, h("b", null, nazev), h("small", null, `hodnota ${hodnotaText(info.hodnota)}`),
         h("div", null, info.popis)))));
 }
@@ -639,6 +688,7 @@ window.addEventListener("hashchange", smeruj);
 (async function start() {
   try {
     katalog = await api("/api/katalog");
+    for (const [kategorie, info] of Object.entries(katalog.kategorie)) specialiste[info.specialista] = kategorie;
   } catch {
     document.body.textContent = "Server neodpovídá. Zkus stránku načíst znovu.";
     return;

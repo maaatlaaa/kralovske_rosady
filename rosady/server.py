@@ -312,8 +312,6 @@ def vytvor_aplikaci(data_dir=DATA_DIR, obrazky_dir=OBRAZKY_DIR,
         return {"ok": True}
 
     aplikace.mount("/obrazky", StaticFiles(directory=obrazky_dir), name="obrazky")
-    aplikace.mount("/fonty", StaticFiles(directory=KOREN / "zdroje" / "fonty"),
-                   name="fonty")
     aplikace.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
 
     @aplikace.get("/")

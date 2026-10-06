@@ -1,6 +1,20 @@
 @font-face {
-  font-family: "Canterbury";
-  src: url("/fonty/Canterbury.ttf") format("truetype");
+  font-family: "Grenze Gotisch";
+  src: url("/static/fonty/GrenzeGotisch.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Alegreya";
+  src: url("/static/fonty/Alegreya.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Alegreya";
+  src: url("/static/fonty/Alegreya-Italic.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -21,7 +35,8 @@
 html, body { margin: 0; min-height: 100%; }
 
 body {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Alegreya", Georgia, "Times New Roman", serif;
+  font-variant-numeric: lining-nums;
   color: var(--text);
   background: #2a1a0f url("/obrazky/pozadi.webp") center / cover fixed;
   background-blend-mode: multiply;
@@ -33,7 +48,7 @@ body {
 .obrazovka { max-width: 1400px; margin: 0 auto; padding: 12px 16px 32px; }
 
 .nadpis {
-  font-family: "Canterbury", Georgia, serif;
+  font-family: "Grenze Gotisch", Georgia, serif;
   font-weight: normal;
   font-size: clamp(2.6rem, 9vw, 5.5rem);
   text-align: center;
@@ -42,7 +57,7 @@ body {
   text-shadow: 0 3px 10px #000;
 }
 
-h2 { font-family: "Canterbury", Georgia, serif; font-weight: normal; font-size: 1.7rem; margin: .2em 0 .4em; }
+h2 { font-family: "Grenze Gotisch", Georgia, serif; font-weight: normal; font-size: 1.7rem; margin: .2em 0 .4em; }
 
 .panel {
   background: var(--pergamen);
@@ -118,7 +133,7 @@ input {
 .pripojeni.ano { background: #2c9b32; }
 
 .kod-hry {
-  font-family: "Canterbury", Georgia, serif;
+  font-family: "Grenze Gotisch", Georgia, serif;
   font-size: 4rem; letter-spacing: .15em; text-align: center; color: var(--cervena);
 }
 
@@ -134,7 +149,7 @@ input {
   box-shadow: var(--stin);
 }
 .domu-odkaz { color: var(--zlata); text-decoration: none; font-size: 1.6rem; line-height: 1; }
-.kolo { font-family: "Canterbury", Georgia, serif; font-size: 1.5rem; }
+.kolo { font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.5rem; }
 .stav-tahu { flex: 1; font-weight: bold; text-align: right; min-width: 200px; }
 .stav-tahu.ja { color: var(--zlata); }
 
@@ -163,40 +178,19 @@ input {
 .sloupec.lze { cursor: pointer; border-color: rgba(217, 167, 43, .6); }
 .sloupec.lze:hover { background: rgba(217, 167, 43, .2); border-color: var(--zlata); }
 
-.cilova {
-  position: relative;
-  aspect-ratio: 5 / 2;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--pergamen-tmavy);
-  border: 2px solid var(--hneda-svetla);
-}
-.cilova img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.cilova.volitelna { cursor: pointer; outline: 3px dashed var(--zlata); outline-offset: 1px; }
-.cilova.vybrana { outline: 4px solid var(--cervena); }
-.cilova .vitez-stitek {
-  position: absolute; inset: auto 0 0 0;
-  font-size: .7rem; font-weight: bold; text-align: center;
-  background: rgba(0, 0, 0, .65); color: #fff; padding: 1px 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.cilova { position: relative; border-radius: 6px; }
+.cilova.volitelna { cursor: pointer; outline: 3px dashed var(--zlata); outline-offset: 2px; }
+.cilova.vybrana { outline: 4px solid var(--cervena); outline-offset: 2px; }
 
-.pole {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 6px;
-  overflow: hidden;
-  min-width: 0;
-}
-.pole img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.pole { position: relative; min-width: 0; }
 .karty { display: flex; flex-direction: column; gap: 6px; }
-/* dlouhe sloupce: karty se prekryvaji, je videt horni cast s hodnotou */
+/* dlouhe sloupce: karty se prekryvaji, je videt horni pruh s nazvem a hodnotou */
 .karty.husty { gap: 0; }
-.karty.husty > .karta + .karta { margin-top: -58%; }
+.karty.husty > .pole.karta + .pole.karta { margin-top: -110%; }
 .karty.husty > .volne { margin-top: 6px; }
-.karty > .karta:hover { z-index: 1; }
-.pole.volne { aspect-ratio: 5 / 2; border: 2px dashed rgba(244, 232, 200, .35); }
-.pole.volne.cil { aspect-ratio: 1; border: 3px solid var(--zlata); background: rgba(217, 167, 43, .35); }
+.karty > .pole.karta:hover { z-index: 3; }
+.pole.volne { aspect-ratio: 5 / 2; border: 2px dashed rgba(244, 232, 200, .35); border-radius: 8px; }
+.pole.volne.cil { aspect-ratio: 5 / 7; border: 3px solid var(--zlata); background: rgba(217, 167, 43, .35); }
 .stav-sloupce {
   text-align: center; font-size: .8rem; font-weight: bold;
   color: var(--pergamen); opacity: .8;
@@ -205,37 +199,194 @@ input {
 .sloupec.uzavreny {
   background: repeating-linear-gradient(135deg, rgba(61, 74, 90, .5) 0 8px, rgba(43, 53, 64, .5) 8px 16px);
 }
-.pole.karta { border: 3px solid var(--barva-hrace, #000); cursor: pointer; }
-.pole.zakryta-moje img { filter: grayscale(.6) brightness(.75); }
-.pole.odstranena img { filter: grayscale(1) brightness(.4); }
+.pole.karta { cursor: pointer; }
+.pole.zakryta-moje .k-obraz img { filter: grayscale(.7) brightness(.6); }
+.pole.odstranena .k { filter: grayscale(1) brightness(.45); }
 .pole.odstranena::after {
   content: "✕"; position: absolute; inset: 0; display: grid; place-items: center;
   color: var(--cervena); font-size: clamp(1.4rem, 6vw, 3.5rem); font-weight: bold;
   text-shadow: 0 0 6px #000;
 }
 .odznak {
-  position: absolute; left: 2px; right: 2px; top: 2px;
-  background: rgba(0, 0, 0, .72); color: #fff;
+  position: absolute; left: 8%; right: 8%; top: 20%; z-index: 2;
+  background: rgba(0, 0, 0, .75); color: #fff;
   font-size: clamp(.55rem, 1.6vw, .78rem); text-align: center;
   border-radius: 4px; padding: 1px 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.odznak.prevlek { top: 22%; background: rgba(120, 30, 120, .85); }
+.odznak.prevlek { top: 32%; background: rgba(120, 30, 120, .9); }
 
 /* ruka */
 .ruka-obal { text-align: center; }
-.ruka { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.ruka { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .karta-ruka {
-  width: clamp(90px, 26vw, 150px);
-  aspect-ratio: 1;
-  padding: 0; border: 3px solid var(--hneda); border-radius: 8px;
-  overflow: hidden; cursor: pointer; background: none;
+  width: clamp(96px, 27vw, 170px);
+  padding: 0; border: 0; background: none; cursor: pointer;
+  border-radius: 7%/5%;
   transition: transform .12s, box-shadow .12s;
 }
-.karta-ruka img { width: 100%; height: 100%; display: block; }
-.karta-ruka:hover { transform: translateY(-4px); }
-.karta-ruka.vybrana { transform: translateY(-10px); border-color: var(--zlata); box-shadow: 0 0 0 3px var(--zlata), var(--stin); }
+.karta-ruka:hover { transform: translateY(-6px); }
+.karta-ruka.vybrana { transform: translateY(-14px); box-shadow: 0 0 0 4px var(--zlata), 0 10px 26px rgba(0, 0, 0, .6); }
 .karta-ruka:disabled { cursor: default; transform: none; }
+
+/* ------------------------------------------------------------ karty */
+/* vse uvnitr karty je v jednotkach cqw (procenta sirky karty),
+   takze karta vypada stejne v ruce, na plose i v detailu */
+
+.k {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 5 / 7;
+  border-radius: 7% / 5%;
+  font-family: "Alegreya", Georgia, serif;
+  color: #2b1a0e;
+  user-select: none;
+}
+.k-ram {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 3.2cqw;
+  background:
+    linear-gradient(155deg, #a57a35 0%, #5a3c17 18%, #2c1c0c 50%, #5a3c17 82%, #a57a35 100%);
+  box-shadow:
+    inset 0 0 0 .7cqw #e2b85a,
+    inset 0 0 0 1.6cqw #2c1c0c,
+    0 1.2cqw 3cqw rgba(0, 0, 0, .55);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.k-obraz {
+  position: relative; overflow: hidden;
+  border-radius: 5cqw 5cqw 0 0;
+  border: 1.8cqw solid var(--hrac);
+  border-bottom: 0;
+  background: #1b120a;
+}
+.k-obraz img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.k-obraz::after {
+  content: ""; position: absolute; inset: 0;
+  box-shadow: inset 0 0 6cqw rgba(0, 0, 0, .7);
+}
+.k-nazev {
+  position: absolute; top: 5cqw; left: 19cqw; right: 19cqw;
+  height: 13cqw;
+  display: grid; place-items: center;
+  font-family: "Grenze Gotisch", Georgia, serif; font-weight: 600;
+  font-size: 9.5cqw; line-height: 1; white-space: nowrap;
+  color: #2b1a0e;
+  background: linear-gradient(#fbf1d6, #e3cc95);
+  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
+  filter: drop-shadow(0 .6cqw .6cqw rgba(0, 0, 0, .6));
+  z-index: 1;
+}
+.k-nazev.dlouhy { font-size: 8cqw; }
+.medailon {
+  position: absolute; top: 1.5cqw;
+  width: 21cqw; height: 21cqw; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1.2cqw solid #e2b85a;
+  box-shadow: 0 .8cqw 1.6cqw rgba(0, 0, 0, .6), inset 0 0 0 .6cqw rgba(0, 0, 0, .35);
+  font-family: "Grenze Gotisch", Georgia, serif; font-weight: 700;
+  font-size: 12cqw; line-height: 1;
+  color: #fff; text-shadow: 0 .7cqw 0 rgba(0, 0, 0, .8);
+  z-index: 2;
+}
+.k-hodnota.male { font-size: 9cqw; letter-spacing: -.04em; }
+.k-hodnota { left: 1.5cqw; background: radial-gradient(circle at 35% 30%, #e5503f, #9a2015 55%, #4c0c06); }
+.k-bonus {
+  right: 1.5cqw;
+  background: radial-gradient(circle at 35% 30%, #fff7dc, var(--kat) 60%, #1b120a);
+  font-size: 8cqw;
+}
+.k-bonus img { position: absolute; width: 70%; height: 70%; object-fit: contain; opacity: .9; }
+.k-bonus span { position: relative; }
+.k-text {
+  position: relative;
+  min-height: 37cqw;
+  padding: 6.5cqw 5cqw 4cqw;
+  display: grid; place-items: center;
+  text-align: center;
+  font-size: 7.2cqw; line-height: 1.15; font-weight: 500;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, .5), transparent 70%),
+    linear-gradient(#f6ead0, #e2cc98);
+  border: 1.8cqw solid var(--hrac);
+  border-top: 0;
+  border-radius: 0 0 5cqw 5cqw;
+}
+.k-text p { margin: 0; }
+.k-text .k-citat { font-style: italic; color: #5a3c17; font-size: 6.6cqw; }
+.k-kdy {
+  position: absolute; top: 0; left: 50%;
+  transform: translate(-50%, -50%);
+  padding: .8cqw 4cqw;
+  border-radius: 99px;
+  border: .7cqw solid #e2b85a;
+  font-size: 5.2cqw; font-weight: 700; line-height: 1.2;
+  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  color: #fbf1d6;
+  background: #2c1c0c;
+}
+.k-kdy-otoceni { background: #8a1c12; }
+.k-kdy-konec { background: #23415e; }
+.k-kdy-kat { background: var(--kat); }
+
+/* rub karty v barve hrace */
+.k-rub .k-ram { grid-template-rows: 1fr; }
+.k-rub .k-pole {
+  position: relative;
+  border-radius: 5cqw;
+  border: 1.2cqw solid #e2b85a;
+  background:
+    repeating-linear-gradient(45deg, rgba(0, 0, 0, .16) 0 1.4cqw, transparent 1.4cqw 9cqw),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, .12) 0 1.4cqw, transparent 1.4cqw 9cqw),
+    radial-gradient(circle, rgba(255, 255, 255, .25), transparent 65%),
+    var(--hrac);
+  display: grid; place-items: center;
+}
+.k-erb {
+  width: 46cqw; height: 46cqw; border-radius: 50%;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 35%, #4a3215, #1b120a);
+  border: 1.4cqw solid #e2b85a;
+  box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, .6);
+}
+.k-erb svg { width: 62%; height: 62%; }
+
+/* cilove karty */
+.c {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 5 / 2;
+  user-select: none;
+}
+.c-telo {
+  position: absolute; inset: 0;
+  border-radius: 7cqw / 17.5cqw;
+  background:
+    radial-gradient(ellipse at 70% 50%, rgba(255, 255, 255, .45), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--kat) 35%, #f6ead0), #e2cc98);
+  box-shadow: inset 0 0 0 1.4cqw var(--kat), inset 0 0 0 2.2cqw #e2b85a, 0 1cqw 2cqw rgba(0, 0, 0, .5);
+  display: grid; grid-template-columns: auto 1fr; align-items: center;
+  padding: 0 5cqw;
+  gap: 3cqw;
+}
+.c-hodnota {
+  width: 26cqw; height: 26cqw; border-radius: 50%;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #fff7dc, var(--kat) 55%, #1b120a);
+  border: 1.4cqw solid #e2b85a;
+  font-family: "Grenze Gotisch", Georgia, serif; font-weight: 700;
+  font-size: 18cqw; line-height: 1; color: #fff; text-shadow: 0 .8cqw 0 rgba(0, 0, 0, .7);
+}
+.c-vpravo { display: grid; justify-items: center; min-width: 0; }
+.c-znak { width: 20cqw; height: 20cqw; object-fit: contain; filter: drop-shadow(0 .6cqw .6cqw rgba(0, 0, 0, .4)); }
+.c-nazev {
+  font-family: "Grenze Gotisch", Georgia, serif; font-weight: 600;
+  font-size: 9cqw; line-height: 1.05; color: #2b1a0e;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+
 .popis-karty {
   min-height: 1.4em; color: var(--pergamen); text-shadow: 0 1px 4px #000;
   margin: 10px auto; max-width: 600px;
@@ -267,7 +418,7 @@ input {
 
 .zaznamy { margin: 0; padding-left: 0; list-style: none; max-height: 320px; overflow-y: auto; font-size: .88rem; }
 .zaznamy li { padding: 3px 0; border-bottom: 1px dotted var(--pergamen-tmavy); }
-details > summary { cursor: pointer; font-family: "Canterbury", Georgia, serif; font-size: 1.5rem; }
+details > summary { cursor: pointer; font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.5rem; }
 
 .poradi { font-size: 1.15rem; }
 .poradi li { padding: 4px 0; }
@@ -291,10 +442,10 @@ details > summary { cursor: pointer; font-family: "Canterbury", Georgia, serif; 
 .pravidla-text li { margin-bottom: 6px; }
 .seznam-karet { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .karta-info { display: flex; gap: 10px; align-items: flex-start; }
-.karta-info img { width: 72px; height: 72px; border-radius: 6px; flex: none; }
+.karta-info > .k { width: 110px; flex: none; }
 .karta-info b { display: block; }
 .karta-info small { color: var(--hneda-svetla); }
-#detail-obsah img { width: 100%; border-radius: 8px; }
+.detail-karta { width: min(280px, 70vw); margin: 0 auto 12px; }
 
 .banner {
   position: sticky; top: 0; z-index: 10;

@@ -1,8 +1,9 @@
 """
 Příprava obrázků pro web.
 
-Originální karty mají 750x750 px a kolem 1 MB, což je na mobil přes VPN
-zbytečně moc. Tady se z nich udělají malé WebP verze (desítky kB).
+Karty se kreslí v prohlížeči (rámeček, název, text), z obrázků se berou jen
+ilustrace a symboly kategorií. Originály mají kolem 1 MB, což je na mobil
+přes VPN zbytečně moc - tady se z nich udělají malé WebP verze.
 Hotové obrázky se znovu negenerují, takže start serveru je pak rychlý.
 
 Ruční spuštění:  python -m rosady.obrazky [cilova_slozka]
@@ -13,7 +14,10 @@ from pathlib import Path
 
 from PIL import Image
 
-VELIKOST_KARTY = 320
+from .karty import KARTY, KATEGORIE
+
+VELIKOST_ILUSTRACE = 512
+VELIKOST_ZNAKU = 128
 SIRKA_POZADI = 1600
 
 
@@ -32,10 +36,15 @@ def _uloz(zdroj, cil, max_rozmer):
 def priprav(zdroje, cil):
     """zdroje = zdroje/obrazky, cil = slozka pro webove obrazky"""
     zdroje, cil = Path(zdroje), Path(cil)
+    podklady = zdroje / "karty_podklady"
     pocet = 0
-    for soubor in sorted((zdroje / "karty").glob("*.png")):
-        pocet += _uloz(soubor, cil / "karty" / f"{soubor.stem}.webp",
-                       (VELIKOST_KARTY, VELIKOST_KARTY))
+    for nazev in [info["soubor"] for info in KARTY.values()]:
+        pocet += _uloz(podklady / f"{nazev}.png", cil / "ilustrace" / f"{nazev}.webp",
+                       (VELIKOST_ILUSTRACE, VELIKOST_ILUSTRACE))
+    for info in KATEGORIE.values():
+        znak = KARTY[info["specialista"]]["soubor"]
+        pocet += _uloz(podklady / f"{znak}_znak.png", cil / "znaky" / f"{znak}.webp",
+                       (VELIKOST_ZNAKU, VELIKOST_ZNAKU))
     pocet += _uloz(zdroje / "pozadi_hlavni_menu.png", cil / "pozadi.webp",
                    (SIRKA_POZADI, SIRKA_POZADI))
     return pocet

@@ -77,8 +77,21 @@ do `data/obrazky` (trvá to asi 20 sekund, pak už se jen používají).
 | `rosady/obrazky.py` | zmenšení obrázků karet pro web |
 | `web/` | webové rozhraní (čisté HTML/CSS/JS, bez sestavování) |
 | `tests/` | testy pravidel a serveru |
-| `generovani_karet.py` | skript, který vygeneroval obrázky karet |
+| `web/fonty/` | písma Grenze Gotisch a Alegreya (licence OFL, plná čeština) |
+| `generovani_karet.py` | skript, který vygeneroval původní obrázky karet (`zdroje/obrazky/karty`) |
 | `puvodni_pygame/` | původní verze s pygame a ovládáním přes terminál |
+
+## Vzhled karet
+
+Karty se kreslí v prohlížeči (`web/app.js` – funkce `karta`, `rubKarty`, `cilovaKarta`, styly v `web/style.css`).
+Z obrázků se berou jen ilustrace a symboly kategorií ze `zdroje/obrazky/karty_podklady`; rámeček, název,
+hodnota a text schopnosti jsou kód. Krátké texty na kartách jsou v `rosady/karty.py` (`kratky`, `kdy`),
+takže změna textu nevyžaduje generování obrázků. Výměna ilustrace = nahradit PNG v `karty_podklady`.
+
+- **Medailon vlevo nahoře** – hodnota karty, **vpravo** u specialistů symbol kategorie s bonusem 12.
+- **Štítek nad textem** – kdy schopnost platí: červený *Po otočení*, modrý *Na konci kola*.
+- **Barva vnitřního rámečku** a rub karty – barva hráče.
+- Název a hodnota jsou nahoře, takže zůstanou vidět i v dlouhých sloupcích, kde se karty překrývají.
 
 ## Pravidla
 
