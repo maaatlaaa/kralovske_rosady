@@ -96,7 +96,6 @@ function karta(nazev, hrac) {
   }
   return h("div", { class: "k", style: `--hrac:${barvaHrace(hrac)}` },
     h("div", { class: "k-ram" },
-      h("div", { class: "k-hlava" }),
       h("div", { class: "k-obraz" },
         h("img", { src: `/obrazky/ilustrace/${info.soubor}.webp`, alt: "", loading: "lazy", draggable: "false" })),
       h("div", { class: "k-text" }, stitek,
