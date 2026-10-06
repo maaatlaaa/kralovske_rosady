@@ -59,31 +59,33 @@ KARTY = {
     "Trubadúr": {"soubor": "trubadur", "hodnota": 8,
                  "popis": _specialista("Hudba")},
     "Objevitel": {"soubor": "objevitel", "hodnota": 13,
-                  "popis": "Po otočení odcestuje na první volné místo v dalším "
-                           "sloupci vpravo (za posledním sloupcem pokračuje "
-                           "prvním). Karta pod ním se posune na jeho místo."},
+                  "popis": "Po otočení se přesune lícem dolů na konec dalšího sloupce "
+                           "vpravo (z posledního sloupce do prvního). Tam "
+                           "otočí kartu nad sebou, jako by byl nově vyložen."},
     "Mordýř": {"soubor": "mordyr", "hodnota": 9.5,
                "popis": "Po otočení zabije kartu, která byla vyložena pod něj. "
-                        "Mág ani Čarodějnice na něj nemají vliv."},
+                        "Díky hodnotě 9,5 na něj neplatí Mág ani Čarodějnice."},
     "Bouře": {"soubor": "boure", "hodnota": 9,
-              "popis": "Po otočení uzavře sloupec - pod kartu, která ji "
-                       "otočila, už nelze nic vyložit."},
+              "popis": "Po otočení uzavře sloupec – nelze do něj už nic "
+                       "vyložit a počítá se jako splněný."},
     "Převlek": {"soubor": "prevlek", "hodnota": 0,
                 "popis": "Po otočení pod něj můžeš skrytě vložit kartu z ruky. "
-                         "Při vyhodnocení se Převlek promění v tuto kartu."},
+                         "Při vyhodnocení se Převlek promění v tuto kartu. "
+                         "Bez karty pod sebou má hodnotu 0."},
     "Zrádce": {"soubor": "zradce", "hodnota": 10,
-               "popis": "Po otočení můžeš prohodit dvě cílové karty "
-                        "v aktuálním kole."},
+               "popis": "Po otočení můžeš vyměnit cílovou kartu jeho sloupce "
+                        "za cílovou kartu jiného sloupce."},
     "Mušketýři": {"soubor": "musketyri", "hodnota": 11,
-                  "popis": "Ve sloupci s Mušketýři neplatí žádné zvláštní "
-                           "schopnosti při vyhodnocení."},
+                  "popis": "Ve sloupci s Mušketýři neplatí žádné schopnosti "
+                           "vyhodnocované na konci kola (ani bonusy "
+                           "specialistů) – počítají se jen základní hodnoty."},
     "Mág": {"soubor": "mag", "hodnota": 7,
             "popis": "Při vyhodnocení odstraní ze sloupce všechny karty "
                      "s hodnotou 10 a více."},
     "Čarodějnice": {"soubor": "carodejnice", "hodnota": 1,
-                    "popis": "Při vyhodnocení odstraní ze sloupce všechny karty "
-                             "s hodnotou 9 a méně (kromě Čarodějnic). "
-                             "Pokud je ve sloupci i Mág, platí jen Mág."},
+                    "popis": "Při vyhodnocení (až po Mágovi) odstraní ze sloupce "
+                             "všechny karty s hodnotou 9 a méně, kromě "
+                             "Čarodějnic."},
     "Princ": {"soubor": "princ", "hodnota": 14,
               "popis": "Máš-li ve stejném sloupci Prince i Panoše, "
                        "vyhráváš sloupec automaticky."},
@@ -91,12 +93,12 @@ KARTY = {
               "popis": "Máš-li ve stejném sloupci Prince i Panoše, "
                        "vyhráváš sloupec automaticky."},
     "Poustevník": {"soubor": "poustevnik", "hodnota": 12,
-                   "popis": "Za každou kartu pod ním ztrácí 1 bod."},
+                   "popis": "Za každou další kartu ve sloupci ztrácí 1 bod."},
     "Paleček": {"soubor": "palecek", "hodnota": 2,
-                "popis": "Za každou kartu pod ním získává 3 body."},
+                "popis": "Za každou další kartu ve sloupci získává 3 body."},
     "Dvojník": {"soubor": "dvojnik", "hodnota": 0,
-                "popis": "Při vyhodnocení získá hodnotu nejbližší karty "
-                         "pod sebou."},
+                "popis": "Při vyhodnocení převezme hodnotu karty těsně pod "
+                         "sebou (ne její schopnost). Bez karty pod sebou má 0."},
     "Drak": {"soubor": "drak", "hodnota": 11,
              "popis": "Všem kartám soupeřů ve sloupci ubere 2 body."},
     "Romeo": {"soubor": "romeo", "hodnota": 5,
@@ -104,7 +106,8 @@ KARTY = {
                        "hodnotu 15."},
     "Žebrák": {"soubor": "zebrak", "hodnota": 4,
                "popis": "Ve sloupci se Žebrákem vyhrává hráč s nejnižším "
-                        "součtem."},
+                        "součtem. Při remíze vyhrává karta nejdál od cílové "
+                        "karty."},
 }
 
 SPECIALISTE = {info["specialista"]: kategorie

@@ -1,4 +1,66 @@
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
+
+# Font Canterbury nema nektera ceska pismena (ř, č, ě, Ž, ...). Chybejici
+# pismeno se slozi ze zakladniho pismene a hacku, ktery se vyrizne
+# z pismene š (resp. Š) stejneho fontu - vypada tak stejne jako ostatni text.
+SKLADANA_PISMENA = {
+    "č": "c", "ď": "d", "ě": "e", "ň": "n", "ř": "r", "ť": "t", "ž": "z",
+    "Č": "C", "Ď": "D", "Ě": "E", "Ň": "N", "Ř": "R", "Ť": "T", "Ž": "Z",
+}
+
+
+def _maska_znaku(znak, font):
+    maska = Image.new("L", (300, 300), 0)
+    ImageDraw.Draw(maska).text((100, 100), znak, font=font, fill=255)
+    return maska
+
+
+def _hacek(zaklad, font):
+    """vrati masku hacku posunutou nad zakladni pismeno"""
+    velke = zaklad.isupper()
+    s_hackem = _maska_znaku("Š" if velke else "š", font)
+    bez_hacku = _maska_znaku("S" if velke else "s", font)
+    hacek = ImageChops.subtract(s_hackem, bez_hacku)
+    stred_s = sum(bez_hacku.getbbox()[0::2]) / 2
+    stred_zakladu = sum(_maska_znaku(zaklad, font).getbbox()[0::2]) / 2
+    return ImageChops.offset(hacek, round(stred_zakladu - stred_s), 0)
+
+
+def _useky(text):
+    """rozdeli text na useky, ktere font umi, a skladana pismena"""
+    useky, aktualni = [], ""
+    for znak in text:
+        if znak in SKLADANA_PISMENA:
+            if aktualni:
+                useky.append(aktualni)
+            useky.append(znak)
+            aktualni = ""
+        else:
+            aktualni += znak
+    if aktualni:
+        useky.append(aktualni)
+    return useky
+
+
+def sirka_textu(text, font):
+    return sum(font.getlength(SKLADANA_PISMENA.get(usek, usek))
+               for usek in _useky(text))
+
+
+def nakresli_text(obrazek, pozice, text, font, barva=(0, 0, 0)):
+    """jako ImageDraw.text, ale umi i ceska pismena, ktera font nema"""
+    draw = ImageDraw.Draw(obrazek)
+    if not any(znak in SKLADANA_PISMENA for znak in text):
+        draw.text(pozice, text, font=font, fill=barva)
+        return
+    x, y = pozice
+    for usek in _useky(text):
+        zaklad = SKLADANA_PISMENA.get(usek, usek)
+        draw.text((x, y), zaklad, font=font, fill=barva)
+        if usek in SKLADANA_PISMENA:
+            obrazek.paste(barva, (round(x) - 100, y - 100),
+                          _hacek(zaklad, font))
+        x += font.getlength(zaklad)
 
 barvy = []
 barva = {"barva": "#ECECEC", "nazev": "bila"}
@@ -64,14 +126,17 @@ for barva in barvy:
         # draw.text((230, 643), karta["nazev"], font=myFont, fill=(0, 0, 0))
 
         text = karta["nazev"]
-        text_rozmery = draw.textbbox((0, 0), text, font=myFont)
+        if any(znak in SKLADANA_PISMENA for znak in text):
+            sirka = round(sirka_textu(text, myFont))
+        else:
+            sirka = draw.textbbox((0, 0), text, font=myFont)[2]
 
         # Výpočet pozice pro vycentrování textu v rámci obdélníku
-        text_pozice_x = obdelnik_pozice[0] + (sirka_obdelniku - text_rozmery[2]) // 2
+        text_pozice_x = obdelnik_pozice[0] + (sirka_obdelniku - sirka) // 2
         text_pozice_y = 643
 
         # Vykreslení textu
-        draw.text((text_pozice_x, text_pozice_y), text, font=myFont, fill=(0, 0, 0))
+        nakresli_text(novy_hlavni_obrazek, (text_pozice_x, text_pozice_y), text, myFont)
 
         novy_hlavni_obrazek.save(f"zdroje/obrazky/karty/"+karta["cesta"]+"_"+barva["nazev"]+".png")
 
@@ -149,14 +214,17 @@ for barva in barvy:
         # draw.text((230, 643), karta["nazev"], font=myFont, fill=(0, 0, 0))
 
         text = karta["nazev"]
-        text_rozmery = draw.textbbox((0, 0), text, font=myFont)
+        if any(znak in SKLADANA_PISMENA for znak in text):
+            sirka = round(sirka_textu(text, myFont))
+        else:
+            sirka = draw.textbbox((0, 0), text, font=myFont)[2]
 
         # Výpočet pozice pro vycentrování textu v rámci obdélníku
-        text_pozice_x = obdelnik_pozice[0] + (sirka_obdelniku - text_rozmery[2]) // 2
+        text_pozice_x = obdelnik_pozice[0] + (sirka_obdelniku - sirka) // 2
         text_pozice_y = 643
 
         # Vykreslení textu
-        draw.text((text_pozice_x, text_pozice_y), text, font=myFont, fill=(0, 0, 0))
+        nakresli_text(novy_hlavni_obrazek, (text_pozice_x, text_pozice_y), text, myFont)
 
         novy_hlavni_obrazek.save("zdroje/obrazky/karty/"+karta["cesta"]+"_"+barva["nazev"]+".png")
 

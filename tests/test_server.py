@@ -73,7 +73,7 @@ def test_tah_a_ulozeni_po_restartu(slozka):
         posledni_stav(ws)
         ws.send_json({"akce": "vyloz", "karta": 0, "sloupec": 1})
         stav = posledni_stav(ws)
-        assert stav["hra"]["plocha"][0][1]["hrac"] == 0
+        assert stav["hra"]["sloupce"][1][0]["hrac"] == 0
         ws.send_json({"akce": "vyloz", "karta": 0, "sloupec": 1})
         assert ws.receive_json()["typ"] == "chyba"
         ws.send_json({"akce": "nesmysl"})
@@ -84,7 +84,7 @@ def test_tah_a_ulozeni_po_restartu(slozka):
     with c2.websocket_connect(f"/ws/{kod}?token={tokeny[1]}") as ws:
         stav = posledni_stav(ws)
         assert stav["hra"]["na_tahu"] == 1
-        pole = stav["hra"]["plocha"][0][1]
+        pole = stav["hra"]["sloupce"][1][0]
         assert pole["hrac"] == 0 and pole["karta"] is None
 
 

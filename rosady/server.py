@@ -254,9 +254,8 @@ def vytvor_aplikaci(data_dir=DATA_DIR, obrazky_dir=OBRAZKY_DIR,
             karta = zprava.get("karta")
             hra.prevlek(ja, None if karta is None else int(karta))
         elif akce == "zradce":
-            a, b = zprava.get("sloupec_a"), zprava.get("sloupec_b")
-            hra.zradce(ja, None if a is None else int(a),
-                       None if b is None else int(b))
+            sloupec = zprava.get("sloupec")
+            hra.zradce(ja, None if sloupec is None else int(sloupec))
         elif akce == "pokracovat":
             za_vsechny = bool(zprava.get("za_vsechny"))
             if za_vsechny and ja != 0:

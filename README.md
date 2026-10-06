@@ -80,24 +80,34 @@ do `data/obrazky` (trvá to asi 20 sekund, pak už se jen používají).
 | `generovani_karet.py` | skript, který vygeneroval obrázky karet |
 | `puvodni_pygame/` | původní verze s pygame a ovládáním přes terminál |
 
-## Pravidla tak, jak jsou naprogramovaná
+## Pravidla
 
-Většina pravidel je převzatá z původního `main.py`. Tam, kde původní kód
-obsahoval chybu nebo nebyl jednoznačný, platí toto (snadno se upraví v `rosady/engine.py`):
+Hra je česká verze hry **Ruse & Bruise** (později **Gambit Royale**, Rio Grande Games).
+Pravidla jsou naprogramovaná podle originálu (zdroj: [recenze a pravidla na Geeky Hobbies](https://www.geekyhobbies.com/ruse-and-bruise-card-game-review-and-rules/)):
 
-- **Mordýř** má hodnotu 9,5 a opravdu se počítá (původně se neceločíselné hodnoty ignorovaly).
-  Díky tomu na něj neplatí Mág (≥ 10) ani Čarodějnice (≤ 9).
-- **Bouře** zablokuje *všechna* místa pod kartou, která ji otočila (původně zůstávalo volné poslední místo,
-  takže se 3 hráči neměla Bouře žádný efekt).
-- **Poustevník** ztrácí 1 bod za každou kartu pod sebou (původní vzorec `hodnota - hráči - řádek - 1`
-  vypadal jako chybějící závorka).
-- **Mág / Čarodějnice** fungují, když je ve sloupci alespoň jeden (původně jen když byl právě jeden).
-  Jsou-li ve sloupci oba, platí jen Mág.
-- **Dvojník** převezme hodnotu nejbližší karty pod sebou ještě před Mágem/Čarodějnicí; pod ním-li nic není, má 0.
-- **Specialisté** (Alchymista, Šermíř, …) dostanou bonus 12 podle cílové karty sloupce při vyhodnocení –
-  takže **Zrádce** jim prohozením cílových karet může bonus vzít nebo dát.
-- Sloupec může vyhrát jen hráč, který v něm má aspoň jednu kartu. Se **Žebrákem** tedy nevyhraje
-  hráč, který do sloupce nic nedal.
-- Začínající hráč se každé kolo posouvá o jednoho dál.
-- Karty v posledním řádku se při vyhodnocení jen odkryjí – jejich akce „po otočení“ se neprovádí
-  (stejně jako v původní verzi).
+- V každém kole leží na stole tolik cílových karet, kolik je hráčů. Sloupce nemají pevnou délku –
+  kartu lze vyložit na konec libovolného sloupce, i když už má karet dost.
+- Kolo **okamžitě končí**, jakmile má každý sloupec aspoň tolik karet, jaká je hodnota jeho cílové karty.
+  Sloupec uzavřený **Bouří** se počítá jako splněný a nelze do něj nic dalšího vyložit.
+- Karta vyložená pod zakrytou kartu ji otočí. Okamžité akce: **Mordýř** zabije kartu vyloženou pod něj,
+  **Objevitel** se přesune lícem dolů na konec dalšího sloupce vpravo (a otočí kartu nad sebou),
+  **Převlek** dovolí vlastníkovi skrytě vložit pod něj kartu z ruky, **Zrádce** vymění cílovou kartu
+  svého sloupce za cílovou kartu jiného sloupce.
+- Na konci kola se všechny karty odkryjí bez okamžitých akcí. Pak platí v tomto pořadí:
+  **Mušketýři** (zruší všechny schopnosti ve sloupci), **Mág** (odstraní karty s hodnotou 10+),
+  **Čarodějnice** (odstraní karty s hodnotou 9 a méně kromě sebe), **Princ + Panoš** (automatická výhra).
+- **Poustevník** −1 a **Paleček** +3 za každou další kartu ve sloupci, **Dvojník** převezme hodnotu karty
+  těsně pod sebou, **Romeo** s Julií má 15, **Drak** ubere 2 body každé kartě soupeřů.
+- Remízu vyhrává hráč, jehož karta leží nejblíž cílové kartě; se **Žebrákem** (vyhrává nejnižší součet)
+  naopak ten, jehož karta leží nejdál.
+- Pořadí hráčů plynule pokračuje i přes konec kola.
+
+Co originální pravidla neříkají jednoznačně (snadno se upraví v `rosady/engine.py`):
+
+- Mág a Čarodějnice posuzují hodnoty už se započtenými bonusy (specialisté 12, Romeo 15, Paleček, Dvojník).
+  Po jejich zásahu se Paleček, Poustevník, Romeo a Dvojník přepočítají jen ze zbylých karet a teprve pak
+  platí Drak.
+- Mušketýři ruší i bonus specialistů (Alchymista, Šermíř, … mají jen 8).
+- Objevitel přeskakuje sloupce uzavřené Bouří a během jednoho tahu může cestovat jen jednou
+  (jinak by se několik Objevitelů mohlo posílat dokola donekonečna).
+- První kolo začíná zakladatel hry.

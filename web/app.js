@@ -83,7 +83,7 @@ let soket = null;
 let prodlevaPripojeni = 1000;
 let casovacPripojeni = null;
 let vybranaKarta = null;   // index karty v ruce
-let vyberZradce = [];      // vybrane sloupce pro Zradce
+let vyberZradce = null;    // sloupec, se kterym Zradce vymeni cilovou kartu
 
 const mojeHry = () => nacti("rosady_hry", {});
 
@@ -234,7 +234,7 @@ function odpojSoket() {
   kodHry = null;
   mistnost = null;
   vybranaKarta = null;
-  vyberZradce = [];
+  vyberZradce = null;
   $("#odpojeno").hidden = true;
   if (stary) stary.close();
 }
@@ -297,7 +297,7 @@ function vykresliHru() {
   const mujTah = hra.faze === "tah" && hra.na_tahu === ja;
   if (vybranaKarta >= hra.ruka.length) vybranaKarta = null;
   const volimZradce = hra.faze === "volba" && hra.volba.hrac === ja && hra.volba.typ === "zradce";
-  if (!volimZradce) vyberZradce = [];
+  if (!volimZradce) vyberZradce = null;
 
   $("#kolo").textContent = `Kolo ${Math.min(hra.kolo + 1, hra.pocet_kol)}/${hra.pocet_kol}`;
   vykresliStav(hra, mujTah);
@@ -361,43 +361,53 @@ function vykresliPlochu(hra, mujTah, volimZradce) {
   const odstranene = new Set();
   for (const v of hra.vysledky_kola) {
     vitezove[v.sloupec] = v.vitez;
-    for (const k of v.karty) if (k.odstranena) odstranene.add(`${k.radek}:${v.sloupec}`);
+    for (const k of v.karty) if (k.odstranena) odstranene.add(`${k.index}:${v.sloupec}`);
   }
 
   const sloupce = [];
   for (let s = 0; s < n; s++) {
-    const volnyRadek = hra.plocha.findIndex((radek) => radek[s] === null);
-    const lze = mujTah && vybranaKarta !== null && volnyRadek !== -1;
-
+    const karty = hra.sloupce[s];
+    const uzavreny = hra.uzavrene[s];
     const cilova = hra.hlavicka[s];
-    const vybrana = vyberZradce.includes(s);
+    const lze = mujTah && vybranaKarta !== null && !uzavreny;
+    const volitelna = volimZradce && s !== hra.volba.sloupec;
+    const vlastniZradce = volimZradce && s === hra.volba.sloupec;
+
     const hlavicka = h("div", {
-      class: "cilova" + (volimZradce ? " volitelna" : "") + (vybrana ? " vybrana" : ""),
+      class: "cilova" + (volitelna ? " volitelna" : "") +
+        (vyberZradce === s || vlastniZradce ? " vybrana" : ""),
       title: `${cilova.kategorie} ${cilova.hodnota}`,
-      onclick: volimZradce ? () => prepniZradce(s) : null,
+      onclick: volitelna ? () => { vyberZradce = s; vykresli(); } : null,
     }, h("img", { src: obrazekCilove(cilova), alt: `${cilova.kategorie} ${cilova.hodnota}` }),
        konecKola && s in vitezove
          ? h("span", { class: "vitez-stitek" },
              vitezove[s] === null ? "nikdo" : `🏆 ${hra.hraci[vitezove[s]].jmeno}`)
          : null);
 
-    const bunky = [];
-    for (let r = 0; r < n; r++) {
-      bunky.push(vykresliPole(hra, hra.plocha[r][s], lze && r === volnyRadek,
-                              odstranene.has(`${r}:${s}`)));
+    let stav;
+    if (uzavreny) stav = "⛈ uzavřeno";
+    else if (karty.length >= cilova.hodnota) stav = `✓ ${karty.length}/${cilova.hodnota}`;
+    else stav = `${karty.length}/${cilova.hodnota}`;
+    const info = h("div", {
+      class: "stav-sloupce" + (uzavreny || karty.length >= cilova.hodnota ? " splneny" : ""),
+      title: "vyložené karty / kolik jich sloupec potřebuje",
+    }, stav);
+
+    const bunky = karty.map((pole, i) => vykresliPole(hra, pole, odstranene.has(`${i}:${s}`)));
+    // prazdna mista do poctu, ktery sloupec potrebuje; pri tahu misto pro novou kartu
+    const chybi = uzavreny ? 0 : Math.max(0, cilova.hodnota - karty.length);
+    for (let i = 0; i < Math.max(chybi, lze ? 1 : 0); i++) {
+      bunky.push(h("div", { class: "pole volne" + (lze && i === 0 ? " cil" : "") }));
     }
     sloupce.push(h("div", {
-      class: "sloupec" + (lze ? " lze" : ""),
+      class: "sloupec" + (lze ? " lze" : "") + (uzavreny ? " uzavreny" : ""),
       onclick: lze ? () => vyloz(s) : null,
-    }, hlavicka, bunky));
+    }, hlavicka, info, h("div", { class: "karty" + (karty.length > 3 ? " husty" : "") }, bunky)));
   }
   plocha.replaceChildren(...sloupce);
 }
 
-function vykresliPole(hra, pole, cil, odstranena) {
-  if (pole === null) return h("div", { class: "pole volne" + (cil ? " cil" : "") });
-  if (pole.blokovano) return h("div", { class: "pole blokovano", title: "Uzavřeno Bouří" }, "⛈");
-
+function vykresliPole(hra, pole, odstranena) {
   const styl = `--barva-hrace:${barvaHrace(pole.hrac)}`;
   const vlastnik = hra.hraci[pole.hrac].jmeno;
   const tridy = ["pole", "karta"];
@@ -415,7 +425,7 @@ function vykresliPole(hra, pole, cil, odstranena) {
   }
   let prevlek = null;
   if (pole.ma_prevlek) {
-    prevlek = h("span", { class: "odznak nahore" },
+    prevlek = h("span", { class: "odznak prevlek" },
       pole.pod_prevlekem ? `🎭 ${pole.pod_prevlekem}` : "🎭 skrytá karta");
   }
   return h("div", {
@@ -426,7 +436,7 @@ function vykresliPole(hra, pole, cil, odstranena) {
       if (udalost.currentTarget.closest(".sloupec.lze")) return;
       ukazDetail(pole, vlastnik);
     },
-  }, h("img", { src: obrazek, alt: pole.karta || "zakrytá karta", loading: "lazy" }), prevlek, odznak);
+  }, h("img", { src: obrazek, alt: pole.karta || "zakrytá karta", loading: "lazy" }), odznak, prevlek);
 }
 
 function ukazDetail(pole, vlastnik) {
@@ -450,12 +460,6 @@ function ukazDetail(pole, vlastnik) {
 function vyloz(sloupec) {
   posli({ akce: "vyloz", karta: vybranaKarta, sloupec });
   vybranaKarta = null;
-}
-
-function prepniZradce(sloupec) {
-  if (vyberZradce.includes(sloupec)) vyberZradce = vyberZradce.filter((s) => s !== sloupec);
-  else vyberZradce = [...vyberZradce, sloupec].slice(-2);
-  vykresli();
 }
 
 function kartaVRuce(hra, nazev, index, vybrana, onclick) {
@@ -501,20 +505,21 @@ function vykresliRozhodnuti(hra, volimZradce) {
       h("button", { class: "tlacitko", onclick: () => posli({ akce: "prevlek", karta: null }) },
         "Nic nevkládat"));
   } else if (volimZradce) {
-    const [a, b] = vyberZradce;
+    const vlastni = hra.volba.sloupec;
     panel.replaceChildren(
       h("h2", null, "🗡 Zrádce"),
-      h("p", null, "Tvůj Zrádce se otočil. Klepni nahoře na dvě cílové karty, které chceš prohodit."),
+      h("p", null, `Tvůj Zrádce ve sloupci ${vlastni + 1} se otočil. Klepni nahoře na cílovou kartu ` +
+        "jiného sloupce – vymění se s cílovou kartou Zrádcova sloupce."),
       h("div", { class: "radek-tlacitek" },
         h("button", {
           class: "tlacitko hlavni",
-          disabled: vyberZradce.length !== 2 ? true : null,
-          onclick: () => posli({ akce: "zradce", sloupec_a: a, sloupec_b: b }),
-        }, vyberZradce.length === 2 ? `Prohodit sloupce ${a + 1} a ${b + 1}` : "Prohodit"),
+          disabled: vyberZradce === null ? true : null,
+          onclick: () => posli({ akce: "zradce", sloupec: vyberZradce }),
+        }, vyberZradce === null ? "Vyměnit" : `Vyměnit sloupce ${vlastni + 1} a ${vyberZradce + 1}`),
         h("button", {
           class: "tlacitko",
-          onclick: () => posli({ akce: "zradce", sloupec_a: null, sloupec_b: null }),
-        }, "Nic neprohazovat")));
+          onclick: () => posli({ akce: "zradce", sloupec: null }),
+        }, "Nic neměnit")));
   }
 }
 
