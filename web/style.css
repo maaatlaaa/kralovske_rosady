@@ -253,12 +253,19 @@ input {
     inset 0 0 0 1.6cqw #2c1c0c,
     0 1.2cqw 3cqw rgba(0, 0, 0, .55);
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: 15cqw minmax(0, 1fr) auto;
+}
+/* pruh s nazvem nad ilustraci - ilustrace tak zustane cela videt */
+.k-hlava {
+  border-radius: 5cqw 5cqw 0 0;
+  border: 1.8cqw solid var(--hrac);
+  border-bottom: 0;
+  background: linear-gradient(#4a3215, #1b120a);
 }
 .k-obraz {
   position: relative; overflow: hidden;
-  border-radius: 5cqw 5cqw 0 0;
   border: 1.8cqw solid var(--hrac);
+  border-top: .6cqw solid #e2b85a;
   border-bottom: 0;
   background: #1b120a;
 }
@@ -268,8 +275,8 @@ input {
   box-shadow: inset 0 0 6cqw rgba(0, 0, 0, .7);
 }
 .k-nazev {
-  position: absolute; top: 5cqw; left: 19cqw; right: 19cqw;
-  height: 13cqw;
+  position: absolute; top: 5.2cqw; left: 19cqw; right: 19cqw;
+  height: 12cqw;
   display: grid; place-items: center;
   font-family: "Grenze Gotisch", Georgia, serif; font-weight: 600;
   font-size: 9.5cqw; line-height: 1; white-space: nowrap;
