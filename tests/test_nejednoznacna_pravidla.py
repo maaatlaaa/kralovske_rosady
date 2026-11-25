@@ -95,6 +95,15 @@ def test_romeo_bez_julie_po_prepoctu():
     assert vyhodnot(hra, 0)["soucty"] == {1: 14, 2: 1}
 
 
+def test_romeo_s_julii_si_bonus_po_prepoctu_necha():
+    hra = nova_hra(3)
+    nastav_sloupec(hra, 0, [("Romeo", 0), ("Julie", 0), ("Čarodějnice", 1),
+                            ("Bouře", 2), ("Drak", 1)])
+    # Carodejnice odstrani Bouri; Romeo ma i po prepoctu 15 a teprve pak
+    # Drak: Romeo 13 + Julie 12, souper Carodejnice 1 + Drak 11
+    assert vyhodnot(hra, 0)["soucty"] == {0: 25, 1: 12}
+
+
 def test_drak_plati_az_po_prepoctu():
     hra = nova_hra(3)
     nastav_sloupec(hra, 0, [("Drak", 0), ("Paleček", 1), ("Čarodějnice", 2),
