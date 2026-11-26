@@ -282,13 +282,19 @@ def vytvor_aplikaci(data_dir=DATA_DIR, obrazky_dir=OBRAZKY_DIR,
         await rozesli(mistnost)
         try:
             while True:
-                zprava = await websocket.receive_json()
-                ja = mistnost.hrac_podle_tokenu(token)
-                if ja is None:
-                    break
                 try:
+                    # KeyError: binarni zprava, ValueError: nevalidni JSON,
+                    # RecursionError: prilis hluboko vnoreny JSON
+                    zprava = await websocket.receive_json()
+                    ja = mistnost.hrac_podle_tokenu(token)
+                    if ja is None:
+                        break
+                    if not isinstance(zprava, dict):
+                        raise TypeError("zprava neni JSON objekt")
                     odesel = await proved(mistnost, ja, zprava)
-                except (ChybaHry, KeyError, TypeError, ValueError) as chyba:
+                # OverflowError: int() z nekonecna
+                except (ChybaHry, KeyError, TypeError, ValueError,
+                        OverflowError, RecursionError) as chyba:
                     text = str(chyba) if isinstance(chyba, ChybaHry) \
                         else "Neplatná akce."
                     await websocket.send_json({"typ": "chyba", "zprava": text})

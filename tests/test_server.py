@@ -88,6 +88,38 @@ def test_tah_a_ulozeni_po_restartu(slozka):
         assert pole["hrac"] == 0 and pole["karta"] is None
 
 
+@pytest.mark.parametrize("data", [
+    "[]",
+    '"x"',
+    "5",
+    "null",
+    '{"akce": "vyloz", "karta": "a"}',
+    '{"akce": "vyloz", "karta": Infinity, "sloupec": 0}',
+    "[" * 100_000,
+    "tohle neni json",
+    "",
+    b'{"akce": "start"}',
+], ids=["pole", "retezec", "cislo", "null", "spatna_karta", "nekonecno",
+        "hluboke_vnoreni", "nevalidni_json", "prazdny_text", "binarni"])
+def test_neplatna_zprava_neshodi_spojeni(slozka, data):
+    c = klient(slozka)
+    kod, tokeny = zaloz_hru(c, ["A", "B"])
+    with c.websocket_connect(f"/ws/{kod}?token={tokeny[0]}") as ws:
+        posledni_stav(ws)
+        ws.send_json({"akce": "start"})
+        posledni_stav(ws)
+        if isinstance(data, bytes):
+            ws.send_bytes(data)
+        else:
+            ws.send_text(data)
+        assert ws.receive_json() == {"typ": "chyba",
+                                     "zprava": "Neplatná akce."}
+        # spojeni funguje dal a platny tah projde
+        ws.send_json({"akce": "vyloz", "karta": 0, "sloupec": 1})
+        stav = posledni_stav(ws)
+        assert stav["hra"]["sloupce"][1][0]["hrac"] == 0
+
+
 def test_opusteni_lobby(slozka):
     c = klient(slozka)
     kod, tokeny = zaloz_hru(c, ["A", "B"])
