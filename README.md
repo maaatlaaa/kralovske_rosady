@@ -1,58 +1,40 @@
 # kralovske_rosady
 
-Královské rošády - karetní hra, která se před lety přestala prodávat. Tento projekt si klade za cíl o vytvoření digitální kopie, která se bude hrát stejně příjemně jako originální hra.
+Královské rošády jsou karetní hra, která se před lety přestala prodávat. Projekt z ní dělá digitální verzi pro rodinu a přátele, která se má hrát stejně příjemně jako originál.
 
-Hra běží jako webová aplikace na domácím serveru. Hráči se připojují z prohlížeče
-(počítač, tablet i mobil) – nic se neinstaluje. Každý vidí jen svoje karty v ruce.
+Hra běží jako webová aplikace na domácím serveru a hráči se připojují z prohlížeče v tailnetu. Nic se neinstaluje a každý vidí jen svoje karty v ruce. Hraje se na počítači nebo tabletu. Mobil zatím vyladěný není: při 4–6 hráčích jsou karty na úzkém displeji malé.
+
+- Brief projektu (cíl, publikum, priority, rozhodnutí): [docs/PROJEKT.md](docs/PROJEKT.md)
+- Zadání (role, scénáře, API, protokol, formát dat): [docs/SPECIFIKACE.md](docs/SPECIFIKACE.md), architektura: [docs/ARCHITEKTURA.md](docs/ARCHITEKTURA.md)
+- Provoz (nasazení, správa her, testování): [docs/wiki/](docs/wiki/README.md)
+- Pravidla pro práci v repozitáři: [CLAUDE.md](CLAUDE.md)
 
 ## Spuštění na serveru (Docker)
 
 ```bash
-git clone https://github.com/maaatlaaa/kralovske_rosady.git
-cd kralovske_rosady
+cd /srv/projects/kralovske_rosady
 docker compose up -d --build
 ```
 
-Hra pak běží na portu **8000**. Rozehrané hry a Sál slávy se ukládají do složky
-`data/` vedle `docker-compose.yml`, takže restart ani aktualizace hru nepřeruší.
-
-Aktualizace na novou verzi:
-
-```bash
-git pull
-docker compose up -d --build
-```
+- Kontejner poslouchá jen na `127.0.0.1:8000`. Ven ho pustí `tailscale serve` a hráči otevřou `http://server:8000`. Celý postup včetně aktualizace je v [docs/wiki/nasazeni.md](docs/wiki/nasazeni.md).
+- Zmenšené obrázky pro web se připraví už při sestavení obrazu (`Dockerfile`).
+- Rozehrané hry a Sál slávy se ukládají do `data/` vedle `docker-compose.yml`, takže restart ani aktualizace hru nepřeruší. Zálohy se nedělají.
 
 ## Přístup pro rodinu přes Tailscale
 
-1. Na serveru i na zařízeních rodiny musí běžet [Tailscale](https://tailscale.com/download)
-   a všichni musí být ve stejném tailnetu. Kdo má vlastní Tailscale účet, tomu
-   můžeš server nasdílet (v administraci Tailscale: *Machines → server → Share*).
-2. Hráči otevřou v prohlížeči `http://<jméno-serveru>:8000`, např.
-   `http://homeserver:8000` (díky MagicDNS) nebo `http://100.x.y.z:8000`.
-3. Volitelně HTTPS a hezčí adresa přes `tailscale serve` (na serveru):
-
-   ```bash
-   sudo tailscale serve --bg 8000
-   ```
-
-   Hra pak poběží na `https://<jméno-serveru>.<tailnet>.ts.net`. Tailscale vyřeší
-   certifikát a funguje to i s WebSockety.
-
-Port 8000 není potřeba otevírat do internetu – stačí, že je dostupný v tailnetu.
-Pokud má server firewall, povol port 8000 alespoň na rozhraní `tailscale0`.
+1. Na zařízeních hráčů musí běžet [Tailscale](https://tailscale.com/download) ve stejném tailnetu jako server. Kdo má vlastní účet Tailscale, tomu jde server nasdílet (administrace Tailscale: *Machines → server → Share*).
+2. Hráči otevřou `http://server:8000`.
+3. Do internetu se nic neotevírá a HTTPS certifikáty tailnetu se nezapínají (rozhodnutí 2026-11-28).
 
 ## Jak se hraje online
 
-1. Jeden hráč zadá jméno a klikne na **Založit novou hru** – dostane čtyřpísmenný kód.
-2. Ostatním pošle odkaz (tlačítko *Zkopírovat odkaz*) nebo kód. Ti zadají jméno a připojí se.
+1. Jeden hráč zadá jméno a klikne na **Založit novou hru**. Dostane čtyřpísmenný kód.
+2. Ostatním pošle odkaz (tlačítko *Zkopírovat odkaz pro ostatní*) nebo kód. Ti zadají jméno a připojí se.
 3. Zakladatel spustí hru (2–6 hráčů).
 4. Kdo je na tahu, klepne na kartu v ruce a pak na sloupec.
-5. Po každém kole se zobrazí výsledky a hráči kliknou na *Pokračovat*. Zakladatel může
-   pokračovat za všechny (když třeba babička odběhla od stolu).
+5. Po každém kole se zobrazí výsledky a hráči kliknou na *Pokračovat*. Zakladatel může pokračovat za všechny (když třeba babička odběhla od stolu).
 
-Prohlížeč si pamatuje, do kterých her patříš – po zavření okna nebo výpadku Wi-Fi se
-stačí vrátit na stránku a vybrat hru v seznamu **Moje hry**.
+Prohlížeč si pamatuje, do kterých her patříš. Po zavření okna nebo výpadku Wi-Fi se stačí vrátit na stránku a vybrat hru v seznamu **Moje hry**. Co dělat se zaseknutou hrou: [docs/wiki/sprava-her.md](docs/wiki/sprava-her.md).
 
 ## Vývoj bez Dockeru
 
@@ -61,11 +43,23 @@ python -m venv .venv
 . .venv/bin/activate
 pip install -r requirements-dev.txt
 uvicorn rosady.server:vytvor_aplikaci --factory --reload --port 8000
-python -m pytest
 ```
 
-Při prvním spuštění se z obrázků v `zdroje/obrazky/karty` připraví zmenšené WebP verze
-do `data/obrazky` (trvá to asi 20 sekund, pak už se jen používají).
+Při prvním spuštění se z obrázků v `zdroje/obrazky/karty_podklady` a z pozadí připraví zmenšené WebP verze do `data/obrazky`. Trvá to asi 20 sekund, pak se už jen používají.
+
+## Testy
+
+- Lokálně: `python -m pytest`.
+- Na serveru (repozitář `self_hosting`): `server/testing/test.sh kralovske_rosady staging`. Worker orchestrátoru spouští `run-tests`.
+- Ruční checklist partie: [docs/wiki/testovani.md](docs/wiki/testovani.md).
+
+## Licence a původ podkladů
+
+- Repozitář je soukromý a **záměrně bez licence**: jde o digitální verzi vydané hry pod jejím názvem a s jejími pravidly. Zveřejnění repa, hry nebo grafiky je samostatné rozhodnutí Matouše.
+- Písma webu Grenze Gotisch a Alegreya mají licenci SIL OFL (`web/fonty/OFL-*.txt`).
+- Ilustrace v `zdroje/obrazky/karty_podklady/`, obrázky v `zdroje/obrazky/karty/` a obrázky s motivem obálky (`main_cz*`, `pozadi_*`) **nemají doloženou licenci**. Smí se používat jen pro soukromé hraní v tailnetu. Pozadí s motivem obálky se z webu odstraní (úkol KR-013) a nová grafika vznikne s doloženou licencí (milník M2).
+- Font `zdroje/fonty/Canterbury.ttf` nemá doloženou licenci. Používá ho jen starý `generovani_karet.py`, web ne.
+- Nové ilustrace se generují jen modely s licencí Apache 2.0 (`POVOLENE_MODELY` v `generovani_ilustraci.py`).
 
 ## Struktura
 
