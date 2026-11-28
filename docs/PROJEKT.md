@@ -83,6 +83,7 @@ Novější rozhodnutí nahrazuje starší.
 | 2026-11-26 | R3: návratový odkaz do rozehrané hry vydává zakladatel | Matouš, `TASKS.md` (KR-008), ZASADY příloha |
 | 2026-11-27 | Texty pro hráče tykají (interní nástroj) | ZASADY §9 |
 | 2026-11-27 | Úkoly mají řadu `KR`; worker nezačne, dokud povinné dokumenty nejsou kompletní (`require_brief`) | `_state/kralovske_rosady/config` |
+| 2026-11-28 | Publikum: rodina a přátelé v tailnetu; veřejnost později samostatným rozhodnutím, architektura ji nemá zbytečně zavírat | Matouš (chat) |
 
 ## Otevřené otázky pro Matouše
 Neblokují práci, vedoucí postupuje podle doporučení.
