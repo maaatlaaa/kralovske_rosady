@@ -91,6 +91,7 @@ Novější rozhodnutí nahrazuje starší.
 | 2026-11-28 | Zakladatel smí odebrat hráče v lobby, ukončit rozehranou hru (bez zápisu do Sálu slávy) a předat roli; je-li zakladatel odpojený déle než 10 minut, roli může převzít kterýkoli hráč | Matouš (chat) |
 | 2026-11-28 | Trvalá instance na http://server:8000 přes tailscale serve jako Immich, HTTPS certifikáty tailnetu se nezapínají; odkaz k ručnímu zkopírování místo schránky (KR-020) | Matouš (chat) |
 | 2026-11-28 | AI protihráč a další sady karet mimo rozsah; AI jen jako [proposed] po partiích | Matouš (chat) |
+| 2026-11-28 | Složka data/ se nezálohuje | Matouš (chat) |
 
 ## Otevřené otázky pro Matouše
 Neblokují práci, vedoucí postupuje podle doporučení.
