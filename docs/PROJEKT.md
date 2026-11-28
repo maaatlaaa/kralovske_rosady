@@ -84,6 +84,7 @@ Novější rozhodnutí nahrazuje starší.
 | 2026-11-27 | Texty pro hráče tykají (interní nástroj) | ZASADY §9 |
 | 2026-11-27 | Úkoly mají řadu `KR`; worker nezačne, dokud povinné dokumenty nejsou kompletní (`require_brief`) | `_state/kralovske_rosady/config` |
 | 2026-11-28 | Publikum: rodina a přátelé v tailnetu; veřejnost později samostatným rozhodnutím, architektura ji nemá zbytečně zavírat | Matouš (chat) |
+| 2026-11-28 | Repo zůstává soukromé a záměrně bez licence (digitální verze vydané hry) | Matouš (chat) |
 
 ## Otevřené otázky pro Matouše
 Neblokují práci, vedoucí postupuje podle doporučení.
