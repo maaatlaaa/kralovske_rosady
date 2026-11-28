@@ -89,6 +89,7 @@ Novější rozhodnutí nahrazuje starší.
 | 2026-11-28 | Roadmapa: M1 Rodinná partie (bezpečnost, odolnost, správa hry zakladatelem, trvalá instance z main, 2–3 partie) → M2 nová grafika s licencí → M3 úpravy podle partií; mobil a AI později | Matouš (chat) |
 | 2026-11-28 | Priority: bezpečnost a soukromí > data hry > spolehlivá a pohodlná partie > jednoduchost > nové funkce | Matouš (chat) |
 | 2026-11-28 | Zakladatel smí odebrat hráče v lobby, ukončit rozehranou hru (bez zápisu do Sálu slávy) a předat roli; je-li zakladatel odpojený déle než 10 minut, roli může převzít kterýkoli hráč | Matouš (chat) |
+| 2026-11-28 | Trvalá instance na http://server:8000 přes tailscale serve jako Immich, HTTPS certifikáty tailnetu se nezapínají; odkaz k ručnímu zkopírování místo schránky (KR-020) | Matouš (chat) |
 
 ## Otevřené otázky pro Matouše
 Neblokují práci, vedoucí postupuje podle doporučení.
